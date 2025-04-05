@@ -1,9 +1,9 @@
 'use client'
 
 import Header from "@/components/header";
+import { MainArea } from "@/components/chat/main-area";
 import { NavBar } from "@/components/chat/nav-bar";
 import { PanelProps, RenderPanels } from "@/components/chat/render-panels";
-import { Home } from "@/components/home/home";
 import { useChatsStore } from "@/store/chats";
 import { useEffect } from "react";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
@@ -25,7 +25,7 @@ const panels: PanelProps[] = [
         children: [
             {
                 id: 3,
-                content: Home
+                content: MainArea
             }
         ]
     }
