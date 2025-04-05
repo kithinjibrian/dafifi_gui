@@ -50,7 +50,7 @@ const createChatSlice: StateCreator<
     },
     sendMessage: async (msg: Message, res: (data: string) => void, end: (chat: Chat) => void) => {
         try {
-            fetch(`http://localhost:3000/chat`, {
+            fetch(`https://api.dafifi.net/chat`, {
                 method: "POST",
                 credentials: 'include',
                 headers: {
