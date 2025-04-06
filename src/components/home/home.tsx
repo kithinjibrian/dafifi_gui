@@ -1,7 +1,8 @@
-import { Chat, useChatsStore } from "@/store/chats";
-import { ChatBox } from "../chat/chat-box";
-import { useRouter } from "next/navigation";
 import { useCallback } from "react";
+import { useRouter } from "next/navigation";
+
+import { ChatBox } from "../chat/chat-box";
+import { Chat, useChatsStore } from "@/store/chats";
 import { Message } from "@/store/message";
 import { md_render } from "@kithinji/md";
 import { ReactExtension } from "@/utils/react";
@@ -14,91 +15,81 @@ export const Home = () => {
         fetchChat,
         pushMessage,
         sendAction,
-        active,
     } = useChatsStore();
 
-    const handleSendMessage = useCallback(async (msg: Message) => {
+    const handleToolExecution = async (active: Chat) => {
 
-        let headerHandled = false;
+        const lastMessage = active?.messages.at(-1);
+        if (!lastMessage || lastMessage.sender !== "assistant") return;
 
-        const handleStream = async (data: string) => {
-            try {
-                const parsed = JSON.parse(data);
-                if (!headerHandled) {
-                    await fetchChat(parsed.chat_id);
-                    router.push(`/c/${parsed.chat_id}`);
-                    headerHandled = true;
-                } else {
-                    const { message_id, chunk } = parsed;
-                    updateMessage(message_id, chunk);
-                }
-            } catch (e) {
-                console.log(e)
-            }
+        const context = md_render(lastMessage.message, new ReactExtension());
 
-        };
+        for (const c of context.code) {
+            const toolRes = await sendAction(active.id, c);
+            if (!toolRes) continue;
 
-        const handleEnd = async (active: Chat) => {
-            if (!active) return;
-
-            const lastMessage = active.messages.at(-1);
-
-            if (lastMessage == undefined)
-                return;
-
-            const context = md_render(lastMessage?.message, new ReactExtension())
-
-            // TODO: extract code from llm
-            if (lastMessage?.sender === "assistant") {
-                context.code.map(async (c) => {
-                    const toolRes = await sendAction(
-                        active.id,
-                        c
-                    );
-
-                    if (!toolRes) return;
-
-                    let toolHeaderHandled = false;
-
-                    await sendMessage(
-                        {
-                            id: toolRes.id,
-                            message: toolRes.message,
-                            sender: "tool",
-                            time: "",
-                            chat_id: active.id,
-                        },
-                        (data: string) => {
-                            const parsed = JSON.parse(data);
-
-                            if (!toolHeaderHandled) {
-                                pushMessage({
-                                    id: parsed.imessage_id,
-                                    sender: "assistant",
-                                    message: ""
-                                });
-                                toolHeaderHandled = true;
-                            } else {
-                                const { message_id, chunk } = parsed;
-                                updateMessage(message_id, chunk);
-                            }
-                        },
-                        () => { }
-                    );
-                })
-            }
-        };
-
-        try {
             await sendMessage(
-                { ...msg, chat_id: "new" },
-                handleStream,
-                handleEnd
+                {
+                    id: toolRes.id,
+                    message: toolRes.message,
+                    sender: "tool",
+                    time: "",
+                    chat_id: active.id,
+                },
+                (data: string) => {
+                    try {
+                        const parsed = JSON.parse(data);
+                        if ("imessage_id" in parsed) {
+                            pushMessage({
+                                id: parsed.imessage_id,
+                                sender: "assistant",
+                                message: "",
+                            });
+                        } else {
+                            const { message_id, chunk } = parsed;
+                            updateMessage(message_id, chunk);
+                        }
+                    } catch (e) {
+                        console.error("Parsing tool response failed:", e);
+                    }
+                },
+                () => { }
             );
-        } catch (err) {
-            console.error("Error sending message:", err);
         }
-    }, [active, pushMessage, updateMessage, sendAction, sendMessage, fetchChat]);
+    };
+
+    const handleStreamData = async (data: string) => {
+        try {
+            const parsed = JSON.parse(data);
+
+            if ("chat_id" in parsed) {
+                await fetchChat(parsed.chat_id, handleToolExecution);
+                router.push(`/c/${parsed.chat_id}`);
+            } else {
+                const { message_id, chunk } = parsed;
+                updateMessage(message_id, chunk);
+            }
+        } catch (e) {
+            console.error("Error handling streamed data:", e);
+        }
+    };
+
+    const handleSendMessage = useCallback(
+        async (msg: Message) => {
+            try {
+                await sendMessage(
+                    { ...msg, chat_id: "new" },
+                    handleStreamData,
+                    () => { }
+                );
+                return "success";
+            } catch (err) {
+                console.error("Error sending message:", err);
+                return "error";
+            }
+        },
+        [sendMessage, handleStreamData]
+    );
 
     return (
         <div className="flex flex-col items-center justify-center h-screen w-full">

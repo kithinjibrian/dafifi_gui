@@ -32,7 +32,7 @@ export const MainArea = () => {
         let a = async (params, active, fetchChat) => {
             if (!active || active.id !== params.slug) {
                 try {
-                    await fetchChat(params.slug);
+                    await fetchChat(params.slug, () => { });
                 } catch (e) {
                     router.push("/")
                 }
@@ -50,20 +50,17 @@ export const MainArea = () => {
     const handleSendMessage = useCallback(async (msg: Message) => {
         if (!active) return;
 
-        let headerHandled = false;
-
         const handleStream = (data: string) => {
             try {
                 const parsed = JSON.parse(data);
 
-                if (!headerHandled) {
+                if ("umessage_id" in parsed) {
                     pushMessage({ ...msg, id: parsed.umessage_id });
                     pushMessage({
                         id: parsed.imessage_id,
                         sender: "assistant",
                         message: ""
                     });
-                    headerHandled = true;
                 } else {
                     const { message_id, chunk } = parsed;
                     updateMessage(message_id, chunk);
@@ -96,8 +93,6 @@ export const MainArea = () => {
 
                     if (!toolRes) return;
 
-                    let toolHeaderHandled = false;
-
                     await sendMessage(
                         {
                             id: toolRes.id,
@@ -109,13 +104,12 @@ export const MainArea = () => {
                         (data: string) => {
                             const parsed = JSON.parse(data);
 
-                            if (!toolHeaderHandled) {
+                            if ("imessage_id" in parsed) {
                                 pushMessage({
                                     id: parsed.imessage_id,
                                     sender: "assistant",
                                     message: ""
                                 });
-                                toolHeaderHandled = true;
                             } else {
                                 const { message_id, chunk } = parsed;
                                 updateMessage(message_id, chunk);

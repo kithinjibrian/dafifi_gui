@@ -17,12 +17,12 @@ export interface ChatStore {
     setChats: (id: string, data: any) => void;
     setActive: (id: string) => void;
     fetchChats: () => void;
-    fetchChat: (id: string) => void;
+    fetchChat: (id: string, end: (active: Chat) => void) => void;
     sendAction: (chat_id: string, code: string) => Promise<Message>;
     deleteChats: (id: string) => Promise<void>;
     pushMessage: (message: Message) => void;
     updateMessage: (message_id: string, message: string) => void;
-    sendMessage: (msg: Message, res: (data: string) => void, end: (chat: Chat) => void) => void;
+    sendMessage: (msg: Message, res: (data: string) => void, end: () => void) => void;
 }
 
 const createChatSlice: StateCreator<
@@ -48,7 +48,7 @@ const createChatSlice: StateCreator<
             }),
         }));
     },
-    sendMessage: async (msg: Message, res: (data: string) => void, end: (chat: Chat) => void) => {
+    sendMessage: async (msg: Message, res: (data: string) => void, end: () => void) => {
         try {
             fetch(`https://api.dafifi.net/chat`, {
                 method: "POST",
@@ -65,12 +65,16 @@ const createChatSlice: StateCreator<
                 function read() {
                     reader.read().then(async ({ done, value }) => {
                         if (done) {
-                            await end(get().active);
+                            await end();
                             return;
                         }
 
+
                         const chunk = decoder.decode(value, { stream: true });
-                        await res(chunk);
+
+                        chunk.split("\n").filter(ch => ch !== "").map(async ch => {
+                            await res(ch)
+                        })
                         read();
                     });
                 }
@@ -105,6 +109,8 @@ const createChatSlice: StateCreator<
     updateMessage: (message_id: string, message: string) => {
         let active = get().active;
 
+        if (!active) return;
+
         const nmsgs = active.messages.map((msg: Message) => {
             if (msg.id == message_id) {
                 msg.message = `${msg.message}${message}`;
@@ -125,12 +131,13 @@ const createChatSlice: StateCreator<
             report_error(e)
         }
     },
-    fetchChat: async (id: string) => {
+    fetchChat: async (id: string, end: (active: Chat) => void) => {
         try {
             const response = await request.get(`chat/${id}`);
             set({ active: response.data })
+            await end(get().active);
         } catch (e) {
-            // report_error(e)
+            report_error(e)
             throw e;
         }
     },

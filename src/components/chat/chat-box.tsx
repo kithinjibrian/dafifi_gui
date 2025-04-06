@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 export const ChatBox = ({ sendMessage }) => {
     const [newMessage, setNewMessage] = useState("");
     const textareaRef = useRef(null);
+    const [loading, setLoading] = useState(true)
 
     const handleSend = () => {
         if (newMessage.trim() === "") return;
@@ -11,7 +12,7 @@ export const ChatBox = ({ sendMessage }) => {
         const time = now.getHours().toString().padStart(2, '0') + ":" +
             now.getMinutes().toString().padStart(2, '0');
 
-        sendMessage({
+        const result = sendMessage({
             message: newMessage,
             sender: "user",
             time: time
