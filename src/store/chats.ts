@@ -97,7 +97,8 @@ const createChatSlice: StateCreator<
                 message: e.message,
                 sender: "tool",
                 time: "",
-                chat_id
+                chat_id,
+                mock: true
             };
         }
     },
