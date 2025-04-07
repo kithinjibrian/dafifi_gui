@@ -1,9 +1,12 @@
 import { useRef, useState } from "react";
+import { Switch } from "@/components/ui/switch"
+import { Label } from "../ui/label";
 
 export const ChatBox = ({ sendMessage }) => {
     const [newMessage, setNewMessage] = useState("");
     const textareaRef = useRef(null);
     const [loading, setLoading] = useState(true)
+    const [mock, setMock] = useState(true)
 
     const handleSend = () => {
         if (newMessage.trim() === "") return;
@@ -15,7 +18,8 @@ export const ChatBox = ({ sendMessage }) => {
         const result = sendMessage({
             message: newMessage,
             sender: "user",
-            time: time
+            time: time,
+            mock
         })
 
         setNewMessage("");
@@ -59,40 +63,45 @@ export const ChatBox = ({ sendMessage }) => {
     };
 
     return (
-        <div className="bg-card w-full rounded-4xl p-2 flex">
-            {/* Left side - emoji icon */}
-            {/* 
-            <div className="self-end mb-2 mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div> 
-            */}
+        <div className="bg-card w-full rounded-4xl p-2 flex flex-col gap-2">
+            {/* Top Row: Textarea + Send Button */}
+            <div className="flex flex-row items-end w-full gap-2">
+                {/* Text Input Area */}
+                <div className="flex-1 relative">
+                    <textarea
+                        ref={textareaRef}
+                        value={newMessage}
+                        onChange={handleTextareaChange}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Type an instruction"
+                        className="w-full py-2 px-4 pr-12 rounded-lg focus:outline-none resize-none overflow-auto"
+                        style={{ height: "40px", maxHeight: "300px", minHeight: "40px" }}
+                        rows={1}
+                    />
+                </div>
 
-            {/* Middle - textarea */}
-            <div className="flex-1 relative">
-                <textarea
-                    ref={textareaRef}
-                    value={newMessage}
-                    onChange={handleTextareaChange}
-                    onKeyPress={handleKeyPress}
-                    className="w-full py-2 px-4 pr-12 focus:outline-none resize-none overflow-auto"
-                    placeholder="Type an instruction"
-                    style={{ height: "40px", maxHeight: "300px", minHeight: "40px" }}
-                    rows={1}
-                />
-            </div>
-
-            {/* Right side - send button, always aligned at bottom */}
-            <div className="self-end mb-2 ml-2">
+                {/* Send Button */}
                 <button
                     onClick={handleSend}
-                    className="bg-sky-500 text-white rounded-full p-2 hover:bg-sky-700 focus:outline-none"
+                    className="bg-sky-500 text-white rounded-full p-2 hover:bg-sky-700 focus:outline-none mb-1"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                 </button>
+            </div>
+
+            {/* Bottom Row: Toggle */}
+            <div className="flex justify-start p-2">
+                <div className="flex items-center space-x-2">
+                    <Switch
+                        checked={mock}
+                        onCheckedChange={setMock}
+                        id="mock" />
+                    <Label htmlFor="mock">{
+                        mock ? "Mock responses" : "Use LLM responses. They are super slow... like go-grab-a-snack slow😂"
+                    }</Label>
+                </div>
             </div>
         </div>
     );

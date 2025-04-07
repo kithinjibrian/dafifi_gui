@@ -59,7 +59,8 @@ export const MainArea = () => {
                     pushMessage({
                         id: parsed.imessage_id,
                         sender: "assistant",
-                        message: ""
+                        message: "",
+                        mock: true
                     });
                 } else {
                     const { message_id, chunk } = parsed;
@@ -100,6 +101,7 @@ export const MainArea = () => {
                             sender: "tool",
                             time: "",
                             chat_id: active.id,
+                            mock: true
                         },
                         (data: string) => {
                             const parsed = JSON.parse(data);
@@ -108,7 +110,8 @@ export const MainArea = () => {
                                 pushMessage({
                                     id: parsed.imessage_id,
                                     sender: "assistant",
-                                    message: ""
+                                    message: "",
+                                    mock: true
                                 });
                             } else {
                                 const { message_id, chunk } = parsed;

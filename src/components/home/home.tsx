@@ -35,6 +35,7 @@ export const Home = () => {
                     sender: "tool",
                     time: "",
                     chat_id: active.id,
+                    mock: true
                 },
                 (data: string) => {
                     try {
@@ -44,6 +45,7 @@ export const Home = () => {
                                 id: parsed.imessage_id,
                                 sender: "assistant",
                                 message: "",
+                                mock: true
                             });
                         } else {
                             const { message_id, chunk } = parsed;
