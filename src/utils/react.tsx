@@ -1,4 +1,6 @@
+import { Button } from "@/components/ui/button";
 import { Context, Extension, Parser, Token, TokenType } from "@kithinji/md"
+import { Copy, Pencil, Play } from "lucide-react";
 import React from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -63,14 +65,41 @@ export class ReactExtension implements Extension {
                 context.result.push(
                     <div
                         key={`code-${context.reactKey++}`}
-                        className="border rounded-md m-2 p-0"
+                        className="border rounded-md m-2 p-0 min-w-40"
                     >
-                        <div
-                            className="bg-card border-b p-2">
-                            {token.language}
+                        <div className="bg-card border-b p-2 flex justify-between items-center">
+                            <span>{token.language}</span>
+                            <div className="flex space-x-2">
+                                {token.language == "lugha" && (
+                                    <Button
+                                        variant={"ghost"}
+                                        className="text-white p-1 rounded"
+                                        onClick={() => { /* Implement copy functionality here */ }}
+                                    >
+                                        <Play />
+                                        Run
+                                    </Button>
+                                )}
+                                <Button
+                                    variant={"ghost"}
+                                    className="text-white p-1 rounded"
+                                    onClick={() => { /* Implement copy functionality here */ }}
+                                >
+                                    <Copy />
+                                    Copy
+                                </Button>
+                                <Button
+                                    variant={"ghost"}
+                                    className="text-white p-1 rounded"
+                                    onClick={() => {  }}
+                                >
+                                    <Pencil />
+                                    Edit
+                                </Button>
+                            </div>
                         </div>
                         <SyntaxHighlighter
-                            language="rust"
+                            language={token.language == "lugha" ? "rust" : token.language}
                             style={materialDark}
                             customStyle={{ margin: "0" }}
                         >

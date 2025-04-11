@@ -7,6 +7,7 @@ export const ChatBox = ({ sendMessage }) => {
     const textareaRef = useRef(null);
     const [loading, setLoading] = useState(true)
     const [mock, setMock] = useState(true)
+    const [run, setRun] = useState(true)
 
     const handleSend = () => {
         if (newMessage.trim() === "") return;
@@ -92,7 +93,16 @@ export const ChatBox = ({ sendMessage }) => {
             </div>
 
             {/* Bottom Row: Toggle */}
-            <div className="flex justify-start p-2">
+            <div className="flex justify-start p-2 gap-2">
+                <div className="flex items-center space-x-2">
+                    <Switch
+                        checked={run}
+                        onCheckedChange={setRun}
+                        id="run" />
+                    <Label htmlFor="run">{
+                        run ? "Run manually" : "Run automatically"
+                    }</Label>
+                </div>
                 <div className="flex items-center space-x-2">
                     <Switch
                         checked={mock}
