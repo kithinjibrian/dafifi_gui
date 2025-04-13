@@ -1,75 +1,33 @@
 import { useChatsStore } from "@/store/chats";
-import { useCodeStore } from "@/store/code";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useRef, useCallback } from "react";
-import { ChatBox } from "./chat-box";
 import { MessageList } from "./message";
+import { useCallback, useEffect, useRef } from "react";
+import { ChatBox } from "./chat-box";
 import { Message } from "@/store/message";
+import { useParams, useRouter } from "next/navigation";
+
 
 export const MainArea = () => {
     const router = useRouter();
     const params = useParams<{ slug: string }>();
-    const { active, fetchChat, sendMessage, pushMessage, updateMessage, sendAction } = useChatsStore();
-    const { get, set } = useCodeStore();
+
+    const {
+        active,
+        sendMessage,
+        pushMessage,
+        fetchChat
+    } = useChatsStore();
+
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
     const scrollToBottom = useCallback(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, []);
 
-    const triggerPendingExecutables = useCallback(() => {
-        get({ key: "state", value: "PENDING" }).forEach(handleToolResponse);
-    }, [get]);
-
-    const handleEnd = useCallback(async () => {
-        if (!active) return;
-        const lastMessage = active.messages.at(-1);
-        if (!lastMessage?.executed) {
-            //triggerPendingExecutables();
-        }
-    }, [active, triggerPendingExecutables]);
-
-    const handleToolResponse = useCallback(async (codeEntry: any) => {
-        if (!active) return;
-
-        const toolRes = await sendAction(active.id, codeEntry.code);
-        set(codeEntry.id, { state: "EXECUTED" });
-        scrollToBottom();
-
-        if (!toolRes) return;
-
-        await sendMessage(
-            {
-                id: toolRes.id,
-                message: toolRes.message,
-                sender: "tool",
-                time: "",
-                chat_id: active.id,
-                mock: true,
-            },
-            (data: string) => {
-                const parsed = JSON.parse(data);
-                if ("imessage_id" in parsed) {
-                    pushMessage({
-                        id: parsed.imessage_id,
-                        sender: "assistant",
-                        message: "",
-                        mock: true,
-                    });
-                } else {
-                    const { message_id, chunk } = parsed;
-                    updateMessage(message_id, chunk);
-                }
-                scrollToBottom();
-            },
-            handleEnd
-        );
-    }, [active, sendAction, sendMessage, set, updateMessage, pushMessage, scrollToBottom, handleEnd]);
-
     useEffect(() => {
-        if (!active) return;
-        triggerPendingExecutables();
-    }, [active, triggerPendingExecutables]);
+        if (active?.messages) {
+            scrollToBottom();
+        }
+    }, [active?.messages, scrollToBottom]);
 
     useEffect(() => {
         if (!active || active.id !== params.slug) {
@@ -77,38 +35,33 @@ export const MainArea = () => {
         }
     }, [params.slug, active, fetchChat, router]);
 
-    useEffect(scrollToBottom, [active, scrollToBottom]);
-
     const handleSendMessage = useCallback(async (msg: Message) => {
         if (!active) return;
 
-        const handleStream = (data: string) => {
-            try {
-                const parsed = JSON.parse(data);
-                if ("umessage_id" in parsed) {
-                    pushMessage({ ...msg, id: parsed.umessage_id });
-                    pushMessage({
-                        id: parsed.imessage_id,
-                        sender: "assistant",
-                        message: "",
-                        mock: true,
-                    });
-                } else {
-                    const { message_id, chunk } = parsed;
-                    updateMessage(message_id, chunk);
-                }
-                scrollToBottom();
-            } catch (e) {
-                console.error(e);
-            }
+        const handleHeader = async (data: any) => {
+            pushMessage({ ...msg, id: data.umessage_id });
+            pushMessage({
+                id: data.imessage_id,
+                sender: "assistant",
+                message: "",
+                mock: true,
+            });
         };
 
         try {
-            await sendMessage({ ...msg, chat_id: active.id }, handleStream, handleEnd);
+            await sendMessage(
+                { ...msg, chat_id: active.id },
+                handleHeader,
+                () => { }
+            );
+            return "success";
         } catch (err) {
             console.error("Error sending message:", err);
+            return "error";
         }
-    }, [active, pushMessage, updateMessage, sendMessage, handleEnd, scrollToBottom]);
+    },
+        [pushMessage, sendMessage, active]
+    );
 
     return (
         <div className="flex flex-col h-full">
@@ -123,4 +76,4 @@ export const MainArea = () => {
             </div>
         </div>
     );
-};
+}

@@ -4,26 +4,20 @@ import { useRouter } from "next/navigation";
 import { ChatBox } from "../chat/chat-box";
 import { useChatsStore } from "@/store/chats";
 import { Message } from "@/store/message";
+import { ReactRender } from "@/utils/react2";
 
 export const Home = () => {
     const router = useRouter();
     const {
         sendMessage,
-        updateMessage,
         fetchChat,
+        getMessage
     } = useChatsStore();
 
-    const handleStreamData = async (data: string) => {
+    const handleHeader = async (data: any) => {
         try {
-            const parsed = JSON.parse(data);
-
-            if ("chat_id" in parsed) {
-                await fetchChat(parsed.chat_id, () => { });
-                router.push(`/c/${parsed.chat_id}`);
-            } else {
-                const { message_id, chunk } = parsed;
-                updateMessage(message_id, chunk);
-            }
+            await fetchChat(data.chat_id, () => { });
+            router.push(`/c/${data.chat_id}`);
         } catch (e) {
             console.error("Error handling streamed data:", e);
         }
@@ -34,7 +28,7 @@ export const Home = () => {
             try {
                 await sendMessage(
                     { ...msg, chat_id: "new" },
-                    handleStreamData,
+                    handleHeader,
                     () => { }
                 );
                 return "success";
@@ -43,7 +37,7 @@ export const Home = () => {
                 return "error";
             }
         },
-        [sendMessage, handleStreamData]
+        [sendMessage]
     );
 
     return (

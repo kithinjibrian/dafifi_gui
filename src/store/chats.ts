@@ -1,6 +1,6 @@
 import { report_error, request } from "@/utils/request";
 import { create, StateCreator } from "zustand";
-import { Message } from "./message";
+import { createMessageSlice, Message, MessageStore } from "./message";
 import { createTabSlice, TabStore } from "./tab"
 import { ReactRender } from "@/utils/react2";
 
@@ -21,9 +21,11 @@ export interface ChatStore {
     fetchChat: (id: string, end: (active: Chat) => void) => Promise<any>;
     sendAction: (chat_id: string, code: string) => Promise<Message>;
     deleteChats: (id: string) => Promise<void>;
+    getMessage: (id: string) => Message;
     pushMessage: (message: Message) => void;
-    updateMessage: (message_id: string, message: string) => void;
-    sendMessage: (msg: Message, res: (data: string) => void, end: () => void) => void;
+    updateMessage: (message_id: string, data: any) => void;
+    appendMessage: (message_id: string, message: string) => void;
+    sendMessage: (msg: Message, res: (data: string) => void, end: (data: any) => void) => void;
 }
 
 const createChatSlice: StateCreator<
@@ -49,41 +51,64 @@ const createChatSlice: StateCreator<
             }),
         }));
     },
-    sendMessage: async (msg: Message, res: (data: string) => void, end: () => void) => {
-        try {
-            fetch(`https://api.dafifi.net/chat`, {
-                method: "POST",
-                credentials: 'include',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(msg)
-            }).then((response) => {
+    sendMessage: async (msg: Message, res: (data: any) => void, end: (data: any) => void) => {
+        const params = new URLSearchParams(msg);
 
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
+        const response = await fetch(`https://api.dafifi.net/chat/prompt?${params.toString()}`, {
+            method: "GET",
+            credentials: 'include',
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
 
-                function read() {
-                    reader.read().then(async ({ done, value }) => {
-                        if (done) {
-                            await end();
-                            return;
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (!reader) return;
+
+        let header = null;
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+                end(header)
+
+                let msg = get().getMessage(header.imessage_id);
+                new ReactRender(msg, header.chat_id, true).run()
+
+                return;
+            }
+
+            const chunk = decoder.decode(value, { stream: true });
+
+            for (const line of chunk.split('\n')) {
+                if (line.startsWith('data: ')) {
+                    const data = line.replace(/^data: /, '').trim();
+
+                    if (data !== "") {
+                        try {
+                            const json = JSON.parse(data);
+
+                            if ("chat_id" in json) {
+                                header = json;
+                                await res(header);
+                            } else {
+                                const { message_id, chunk } = json;
+                                if (chunk !== "[DONE]\n")
+                                    get().appendMessage(message_id, chunk);
+                            }
+
+                        } catch (e) {
+                            throw e;
                         }
-
-
-                        const chunk = decoder.decode(value, { stream: true });
-
-                        chunk.split("\n").filter(ch => ch !== "").map(async ch => {
-                            await res(ch)
-                        })
-                        read();
-                    });
+                    }
                 }
-
-                read()
-            });
-        } catch (e) {
-            report_error(e)
+            }
         }
     },
     sendAction: async (chat_id: string, code: string): Promise<Message> => {
@@ -102,28 +127,50 @@ const createChatSlice: StateCreator<
                 mock: true
             };
         }
+
+
+    },
+    getMessage: (id: string): Message => {
+        let active = get().active;
+
+        return active.messages.find((msg: Message) => msg.id == id);
     },
     pushMessage: (message: Message) => {
         let active = get().active;
         active.messages = [...active.messages, message];
         set({ active })
     },
-    updateMessage: (message_id: string, message: string) => {
-        let active = get().active;
+    updateMessage: (message_id: string, data: Partial<Message>) => {
+        const active = get().active;
+        if (!active?.messages) return;
 
+        const nmsgs = active.messages.map((msg: Message) =>
+            msg.id === message_id ? { ...msg, ...data } : msg
+        );
+
+        set({
+            active: {
+                ...active,
+                messages: nmsgs,
+            },
+        });
+    },
+    appendMessage: (message_id: string, message: string) => {
+        const active = get().active;
         if (!active) return;
 
-        const nmsgs = active.messages.map((msg: Message) => {
-            if (msg.id == message_id) {
-                msg.message = `${msg.message}${message}`;
+        const updatedMessages = active.messages.map((msg: Message) =>
+            msg.id === message_id
+                ? { ...msg, done: false, message: msg.message + message }
+                : msg
+        );
+
+        set({
+            active: {
+                ...active,
+                messages: updatedMessages
             }
-
-            return msg;
-        })
-
-        active.messages = nmsgs;
-
-        set({ active })
+        });
     },
     fetchChats: async () => {
         try {
@@ -190,8 +237,80 @@ const createChatSlice: StateCreator<
 })
 
 export const useChatsStore = create<
-    ChatStore & TabStore
+    ChatStore & TabStore & MessageStore
 >((...a) => ({
     ...createChatSlice(...a),
+    ...createMessageSlice(...a),
     ...createTabSlice(...a)
 }))
+
+
+/**
+ fetch(`https://api.dafifi.net/chat`, {
+                method: "POST",
+                credentials: 'include',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(msg)
+            }).then((response) => {
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                function read() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            // await end();
+                            return;
+                        }
+
+                        const chunk = decoder.decode(value, { stream: true });
+
+                        console.log("+++++++++++++++++++")
+                        console.log(chunk)
+
+                        // chunk.split("\n").filter(ch => ch !== "").map(async ch => {
+                        //     console.log(ch)
+                        // })
+                        read();
+                    });
+                }
+
+                read()
+            });
+
+
+            try {
+            const res = await fetch(`https://api.dafifi.net/chat`, {
+                method: "POST",
+                credentials: 'include',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(msg)
+            });
+
+            if (!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+
+                if (done) {
+                    return;
+                }
+
+                const chunk = decoder.decode(value, { stream: true });
+                console.log("+++++++++++++++++++")
+                console.log(chunk)
+            }
+        } catch (e) {
+            report_error(e)
+        }
+ */

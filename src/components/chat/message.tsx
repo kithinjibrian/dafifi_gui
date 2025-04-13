@@ -1,15 +1,9 @@
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { ReactRender } from "@/utils/react2";
 import { ScrollArea } from "../ui/scroll-area";
-import { useEffect, useState } from "react";
 
 export const Message = ({ message, isGrouped }) => {
-    const [react, setReact] = useState([]);
-
-    useEffect(() => {
-        const react = new ReactRender(message).run();
-        setReact(react);
-    }, [])
+    const { react } = new ReactRender(message).run();
 
     return (
         <>

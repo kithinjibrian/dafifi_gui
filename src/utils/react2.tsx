@@ -23,6 +23,7 @@ import {
     NumberNode,
     OlNode,
     ParagraphNode,
+    SinkholeNode,
     StringNode
 } from "@kithinji/lml";
 import { Button } from "@/components/ui/button";
@@ -32,17 +33,21 @@ import { Copy, Pencil, Play } from "lucide-react";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useCodeStore } from "@/store/code";
 import { Message } from "@/store/message";
+import { useChatsStore } from "@/store/chats";
 
 export class ReactRender implements LmlASTVisitor {
     private extensions: Extension<any>[] = [];
     private key: number = 0;
+    private metadata = new Map();
 
     private get_key(name: string) {
         return `${name}-${this.key++}`
     }
 
     constructor(
-        public message: Message
+        public message: Message,
+        public chat_id: string = "",
+        public save: boolean = false
     ) { }
 
     public extension(p: Extension<any>) {
@@ -67,7 +72,14 @@ export class ReactRender implements LmlASTVisitor {
     public run() {
         try {
             const ast = lml(this.message.message);
-            return this.visit(ast)
+            const react = this.visit(ast)
+            if (this.save) {
+                const exec = useCodeStore.getState().exec;
+                exec(this.chat_id)
+            }
+            return {
+                react
+            };
         } catch (e) {
             throw e;
         }
@@ -339,10 +351,11 @@ export class ReactRender implements LmlASTVisitor {
         args?: Record<string, any>
     ) {
         const attr = this.visit(node.attributes);
+
         const code = this.visit(node.body, args);
 
-        if (!this.message.executed) {
-            if (attr.lang === "lugha" && attr.run) {
+        if (this.save) {
+            if (attr.lang === "lugha" && attr.run == "true") {
                 const push = useCodeStore.getState().push;
                 push(code);
             }
@@ -407,5 +420,9 @@ export class ReactRender implements LmlASTVisitor {
         return {
             [key]: value
         }
+    }
+
+    visitSinkhole(node: SinkholeNode, args?: Record<string, any>) {
+        return;
     }
 }
