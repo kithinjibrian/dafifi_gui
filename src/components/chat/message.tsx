@@ -7,7 +7,7 @@ export const Message = ({ message, isGrouped }) => {
     const [react, setReact] = useState([]);
 
     useEffect(() => {
-        const react = new ReactRender(message.message).run();
+        const react = new ReactRender(message).run();
         setReact(react);
     }, [])
 

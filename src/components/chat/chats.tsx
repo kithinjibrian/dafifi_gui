@@ -164,7 +164,9 @@ const ChatItem = ({
     const [react, setReact] = useState([]);
 
     useEffect(() => {
-        const react = new ReactRender(chat.title).run();
+        const react = new ReactRender({
+            message: chat.title
+        }).run();
         setReact(react);
     }, [])
 

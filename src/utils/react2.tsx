@@ -31,6 +31,7 @@ import SyntaxHighlighter from "react-syntax-highlighter";
 import { Copy, Pencil, Play } from "lucide-react";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useCodeStore } from "@/store/code";
+import { Message } from "@/store/message";
 
 export class ReactRender implements LmlASTVisitor {
     private extensions: Extension<any>[] = [];
@@ -41,7 +42,7 @@ export class ReactRender implements LmlASTVisitor {
     }
 
     constructor(
-        public code: string
+        public message: Message
     ) { }
 
     public extension(p: Extension<any>) {
@@ -65,7 +66,7 @@ export class ReactRender implements LmlASTVisitor {
 
     public run() {
         try {
-            const ast = lml(this.code);
+            const ast = lml(this.message.message);
             return this.visit(ast)
         } catch (e) {
             throw e;
@@ -340,9 +341,11 @@ export class ReactRender implements LmlASTVisitor {
         const attr = this.visit(node.attributes);
         const code = this.visit(node.body, args);
 
-        if (attr.lang === "lugha" && attr.run) {
-            const push = useCodeStore.getState().push;
-            push(code);
+        if (!this.message.executed) {
+            if (attr.lang === "lugha" && attr.run) {
+                const push = useCodeStore.getState().push;
+                push(code);
+            }
         }
 
         return (

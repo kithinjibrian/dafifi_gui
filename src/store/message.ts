@@ -5,4 +5,5 @@ export interface Message {
     message: string;
     time?: string;
     chat_id?: string;
+    executed?: boolean;
 }

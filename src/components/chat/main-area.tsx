@@ -24,8 +24,8 @@ export const MainArea = () => {
     const handleEnd = useCallback(async () => {
         if (!active) return;
         const lastMessage = active.messages.at(-1);
-        if (lastMessage?.sender === "assistant") {
-            triggerPendingExecutables();
+        if (!lastMessage?.executed) {
+            //triggerPendingExecutables();
         }
     }, [active, triggerPendingExecutables]);
 
