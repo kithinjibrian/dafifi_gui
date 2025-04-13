@@ -1,51 +1,83 @@
 import { useChatsStore } from "@/store/chats";
-import { useParams } from "next/navigation";
+import { useCodeStore } from "@/store/code";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useCallback } from "react";
 import { ChatBox } from "./chat-box";
 import { MessageList } from "./message";
 import { Message } from "@/store/message";
-import { md_render } from "@kithinji/md";
-import { ReactExtension } from "@/utils/react";
-import { useRouter } from 'next/navigation'
 
 export const MainArea = () => {
-    const router = useRouter()
-
+    const router = useRouter();
     const params = useParams<{ slug: string }>();
-    const {
-        active,
-        fetchChat,
-        sendMessage,
-        pushMessage,
-        updateMessage,
-        sendAction
-    } = useChatsStore();
-
+    const { active, fetchChat, sendMessage, pushMessage, updateMessage, sendAction } = useChatsStore();
+    const { get, set } = useCodeStore();
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-    const scrollToBottom = () => {
+    const scrollToBottom = useCallback(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+    }, []);
 
-    // Fetch chat if not already loaded
-    useEffect(() => {
-        let a = async (params, active, fetchChat) => {
-            if (!active || active.id !== params.slug) {
-                try {
-                    await fetchChat(params.slug, () => { });
-                } catch (e) {
-                    router.push("/")
-                }
-            }
+    const triggerPendingExecutables = useCallback(() => {
+        get({ key: "state", value: "PENDING" }).forEach(handleToolResponse);
+    }, [get]);
+
+    const handleEnd = useCallback(async () => {
+        if (!active) return;
+        const lastMessage = active.messages.at(-1);
+        if (lastMessage?.sender === "assistant") {
+            triggerPendingExecutables();
         }
+    }, [active, triggerPendingExecutables]);
 
-        a(params, active, fetchChat)
-    }, [params.slug, active, fetchChat]);
+    const handleToolResponse = useCallback(async (codeEntry: any) => {
+        if (!active) return;
 
-    // Auto-scroll on message update
-    useEffect(() => {
+        const toolRes = await sendAction(active.id, codeEntry.code);
+        set(codeEntry.id, { state: "EXECUTED" });
         scrollToBottom();
-    }, [active]);
+
+        if (!toolRes) return;
+
+        await sendMessage(
+            {
+                id: toolRes.id,
+                message: toolRes.message,
+                sender: "tool",
+                time: "",
+                chat_id: active.id,
+                mock: true,
+            },
+            (data: string) => {
+                const parsed = JSON.parse(data);
+                if ("imessage_id" in parsed) {
+                    pushMessage({
+                        id: parsed.imessage_id,
+                        sender: "assistant",
+                        message: "",
+                        mock: true,
+                    });
+                } else {
+                    const { message_id, chunk } = parsed;
+                    updateMessage(message_id, chunk);
+                }
+                scrollToBottom();
+            },
+            handleEnd
+        );
+    }, [active, sendAction, sendMessage, set, updateMessage, pushMessage, scrollToBottom, handleEnd]);
+
+    useEffect(() => {
+        if (!active) return;
+        triggerPendingExecutables();
+    }, [active, triggerPendingExecutables]);
+
+    useEffect(() => {
+        if (!active || active.id !== params.slug) {
+            fetchChat(params.slug, () => { }).catch(() => router.push("/"));
+        }
+    }, [params.slug, active, fetchChat, router]);
+
+    useEffect(scrollToBottom, [active, scrollToBottom]);
 
     const handleSendMessage = useCallback(async (msg: Message) => {
         if (!active) return;
@@ -53,99 +85,40 @@ export const MainArea = () => {
         const handleStream = (data: string) => {
             try {
                 const parsed = JSON.parse(data);
-
                 if ("umessage_id" in parsed) {
                     pushMessage({ ...msg, id: parsed.umessage_id });
                     pushMessage({
                         id: parsed.imessage_id,
                         sender: "assistant",
                         message: "",
-                        mock: true
+                        mock: true,
                     });
                 } else {
                     const { message_id, chunk } = parsed;
                     updateMessage(message_id, chunk);
                 }
-
                 scrollToBottom();
             } catch (e) {
-                console.log(e);
-            }
-
-        };
-
-        const handleEnd = async () => {
-            const lastMessage = active.messages.at(-1);
-            if (lastMessage == undefined)
-                return;
-
-            const context = md_render(lastMessage?.message, new ReactExtension())
-
-            // TODO: extract code from llm
-            if (lastMessage?.sender === "assistant") {
-                context.code.map(async (c) => {
-
-                    const toolRes = await sendAction(
-                        active.id,
-                        c
-                    );
-
-                    scrollToBottom();
-
-                    if (!toolRes) return;
-
-                    await sendMessage(
-                        {
-                            id: toolRes.id,
-                            message: toolRes.message,
-                            sender: "tool",
-                            time: "",
-                            chat_id: active.id,
-                            mock: true
-                        },
-                        (data: string) => {
-                            const parsed = JSON.parse(data);
-
-                            if ("imessage_id" in parsed) {
-                                pushMessage({
-                                    id: parsed.imessage_id,
-                                    sender: "assistant",
-                                    message: "",
-                                    mock: true
-                                });
-                            } else {
-                                const { message_id, chunk } = parsed;
-                                updateMessage(message_id, chunk);
-                            }
-
-                            scrollToBottom();
-                        },
-                        () => { }
-                    );
-                })
+                console.error(e);
             }
         };
 
         try {
-            await sendMessage(
-                { ...msg, chat_id: active.id },
-                handleStream,
-                handleEnd
-            );
+            await sendMessage({ ...msg, chat_id: active.id }, handleStream, handleEnd);
         } catch (err) {
             console.error("Error sending message:", err);
         }
-    }, [active, pushMessage, updateMessage, sendAction, sendMessage]);
+    }, [active, pushMessage, updateMessage, sendMessage, handleEnd, scrollToBottom]);
 
     return (
-        <div className="flex flex-col h-full w-full">
+        <div className="flex flex-col h-full">
             {active && (
                 <MessageList
                     messages={active.messages}
                     messagesEndRef={messagesEndRef}
                 />
             )}
-            <div className="flex p-2 w-full shadow-lg justify-center bg-background">
+            <div className="flex p-1 w-full shadow-lg justify-center bg-background">
                 <ChatBox sendMessage={handleSendMessage} />
             </div>
         </div>

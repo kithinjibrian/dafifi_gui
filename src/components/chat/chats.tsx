@@ -10,13 +10,14 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 
-import { useState } from "react";
-import { MoreVertical, Pencil, SquareMousePointer, Star, Trash } from "lucide-react";
+import { useEffect, useState } from "react";
+import { MoreVertical, SquareMousePointer, Star, Trash } from "lucide-react";
 
 import { useChatsStore } from "@/store/chats";
 import Link from 'next/link';
 
 import { useRouter } from 'next/navigation'
+import { ReactRender } from '@/utils/react2';
 
 export const Chats = () => {
     const router = useRouter()
@@ -160,6 +161,13 @@ const ChatItem = ({
         deleteChats(chat.id)
     }
 
+    const [react, setReact] = useState([]);
+
+    useEffect(() => {
+        const react = new ReactRender(chat.title).run();
+        setReact(react);
+    }, [])
+
     return (
         <div
             onClick={() => setActiveChat(chat.id)}
@@ -174,7 +182,7 @@ const ChatItem = ({
                     />
                 )}
                 <Link href={`/c/${chat.id}`} className="no-underline w-full">
-                    {chat.title}
+                    {react}
                 </Link>
             </div>
 

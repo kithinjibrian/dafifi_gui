@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TooltipComponent } from "../utils/tooltip";
 import { MessageCircle, Plus } from "lucide-react";
@@ -11,12 +11,29 @@ const navItems = [
     { value: 'Chats', icon: MessageCircle, content: Chats },
 ]
 
-export const NavBar = () => {
+export const NavBar = (panelRef: any) => {
     const { activeTab, setActiveTab } = useChatsStore();
+    const [isCollapsed, setIsCollapsed] = useState(Array(navItems.length).fill(0));
+
+    const setCollapse = (index: number) => {
+        setIsCollapsed((prev) => {
+            let s = prev[index];
+            const newState = Array(prev.length).fill(0)
+            newState[index] = !s
+            return newState
+        })
+
+        if (isCollapsed[index]) {
+            panelRef.current.collapse();
+        } else if (!isCollapsed[index]) {
+            panelRef.current.expand();
+        }
+    }
 
     const renderNavItems = () =>
-        navItems.map((item) => (
+        navItems.map((item, index) => (
             <TabsTrigger
+                onClick={() => setCollapse(index)}
                 value={item.value}
                 key={item.value}
                 className="bg-background w-full border-l-4 border-l-transparent data-[state=active]:border-l-sky-900 data-[state=active]:shadow-none">

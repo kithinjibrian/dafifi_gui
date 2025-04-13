@@ -17,7 +17,7 @@ export const ChatBox = ({ sendMessage }) => {
             now.getMinutes().toString().padStart(2, '0');
 
         const result = sendMessage({
-            message: newMessage,
+            message: `p{ "${newMessage}" }`,
             sender: "user",
             time: time,
             mock
@@ -101,15 +101,6 @@ export const ChatBox = ({ sendMessage }) => {
                         id="run" />
                     <Label htmlFor="run">{
                         run ? "Run manually" : "Run automatically"
-                    }</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                    <Switch
-                        checked={mock}
-                        onCheckedChange={setMock}
-                        id="mock" />
-                    <Label htmlFor="mock">{
-                        mock ? "Mock responses" : "Use LLM responses. They are super slow... like go-grab-a-snack slow😂"
                     }</Label>
                 </div>
             </div>

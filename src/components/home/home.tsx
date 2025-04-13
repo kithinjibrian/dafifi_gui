@@ -2,10 +2,8 @@ import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 import { ChatBox } from "../chat/chat-box";
-import { Chat, useChatsStore } from "@/store/chats";
+import { useChatsStore } from "@/store/chats";
 import { Message } from "@/store/message";
-import { md_render } from "@kithinji/md";
-import { ReactExtension } from "@/utils/react";
 
 export const Home = () => {
     const router = useRouter();
@@ -13,59 +11,14 @@ export const Home = () => {
         sendMessage,
         updateMessage,
         fetchChat,
-        pushMessage,
-        sendAction,
     } = useChatsStore();
-
-    const handleToolExecution = async (active: Chat) => {
-
-        const lastMessage = active?.messages.at(-1);
-        if (!lastMessage || lastMessage.sender !== "assistant") return;
-
-        const context = md_render(lastMessage.message, new ReactExtension());
-
-        for (const c of context.code) {
-            const toolRes = await sendAction(active.id, c);
-            if (!toolRes) continue;
-
-            await sendMessage(
-                {
-                    id: toolRes.id,
-                    message: toolRes.message,
-                    sender: "tool",
-                    time: "",
-                    chat_id: active.id,
-                    mock: true
-                },
-                (data: string) => {
-                    try {
-                        const parsed = JSON.parse(data);
-                        if ("imessage_id" in parsed) {
-                            pushMessage({
-                                id: parsed.imessage_id,
-                                sender: "assistant",
-                                message: "",
-                                mock: true
-                            });
-                        } else {
-                            const { message_id, chunk } = parsed;
-                            updateMessage(message_id, chunk);
-                        }
-                    } catch (e) {
-                        console.error("Parsing tool response failed:", e);
-                    }
-                },
-                () => { }
-            );
-        }
-    };
 
     const handleStreamData = async (data: string) => {
         try {
             const parsed = JSON.parse(data);
 
             if ("chat_id" in parsed) {
-                await fetchChat(parsed.chat_id, handleToolExecution);
+                await fetchChat(parsed.chat_id, () => { });
                 router.push(`/c/${parsed.chat_id}`);
             } else {
                 const { message_id, chunk } = parsed;

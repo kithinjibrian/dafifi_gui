@@ -1,18 +1,25 @@
-import { md_render } from "@kithinji/md";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import { ReactExtension } from "@/utils/react";
+import { ReactRender } from "@/utils/react2";
+import { ScrollArea } from "../ui/scroll-area";
+import { useEffect, useState } from "react";
 
 export const Message = ({ message, isGrouped }) => {
-    const context = md_render(message.message, new ReactExtension())
+    const [react, setReact] = useState([]);
+
+    useEffect(() => {
+        const react = new ReactRender(message.message).run();
+        setReact(react);
+    }, [])
+
     return (
         <>
             <div
                 className={`${isGrouped ? 'mt-1' : ''} ${message.sender === "user"
                     ? "bg-sky-700 text-foreground"
                     : "bg-card text-foreground"
-                    } rounded-3xl py-2 px-4 relative min-w-40`}
+                    } rounded-3xl py-4 px-4 relative min-w-40`}
             >
-                {context.result}
+                {react}
                 <div className="text-xs text-gray-300 text-right mt-1">
                     {message.time}
                 </div>
@@ -86,7 +93,7 @@ export const MessageList = ({ messages, messagesEndRef }) => {
     const groupedMessages = groupMessages(messages);
 
     return (
-        <div className="flex-1 overflow-y-auto p-4 bg-background">
+        <ScrollArea className="flex-1 p-4 h-3/4 w-full">
             {groupedMessages.map((group, index) => (
                 <MessageGroup
                     key={index}
@@ -95,6 +102,6 @@ export const MessageList = ({ messages, messagesEndRef }) => {
             ))}
             <div className="py-10"></div>
             <div ref={messagesEndRef} />
-        </div>
+        </ScrollArea>
     );
 };

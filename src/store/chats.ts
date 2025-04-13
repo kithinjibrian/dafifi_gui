@@ -2,6 +2,7 @@ import { report_error, request } from "@/utils/request";
 import { create, StateCreator } from "zustand";
 import { Message } from "./message";
 import { createTabSlice, TabStore } from "./tab"
+import { ReactRender } from "@/utils/react2";
 
 export interface Chat {
     id: string;
@@ -17,7 +18,7 @@ export interface ChatStore {
     setChats: (id: string, data: any) => void;
     setActive: (id: string) => void;
     fetchChats: () => void;
-    fetchChat: (id: string, end: (active: Chat) => void) => void;
+    fetchChat: (id: string, end: (active: Chat) => void) => Promise<any>;
     sendAction: (chat_id: string, code: string) => Promise<Message>;
     deleteChats: (id: string) => Promise<void>;
     pushMessage: (message: Message) => void;
@@ -132,9 +133,10 @@ const createChatSlice: StateCreator<
             report_error(e)
         }
     },
-    fetchChat: async (id: string, end: (active: Chat) => void) => {
+    fetchChat: async (id: string, end: (active: Chat) => void): Promise<any> => {
         try {
             const response = await request.get(`chat/${id}`);
+
             set({ active: response.data })
             await end(get().active);
         } catch (e) {

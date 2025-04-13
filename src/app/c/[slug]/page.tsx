@@ -8,12 +8,13 @@ import { useChatsStore } from "@/store/chats";
 import { useEffect } from "react";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useAuthStore } from "@/store/auth";
+import { Artifact } from "@/components/chat/artifact";
 
 const panels: PanelProps[] = [
     {
         id: 1,
         content: NavBar,
-        defaultSize: 30,
+        defaultSize: 25,
         minSize: 10,
         maxSize: 70,
         collapsible: true,
@@ -21,13 +22,12 @@ const panels: PanelProps[] = [
     },
     {
         id: 2,
-        direction: 'vertical',
-        children: [
-            {
-                id: 3,
-                content: MainArea
-            }
-        ]
+        content: MainArea
+    },
+    {
+        id: 3,
+        collapsible: true,
+        content: Artifact
     }
 ];
 
