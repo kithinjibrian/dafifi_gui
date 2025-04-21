@@ -5,7 +5,6 @@ import {
     AttributeNode,
     BlockNode,
     BNode,
-    BooleanNode,
     ButtonNode,
     CodeNode,
     DocumentNode,
@@ -326,13 +325,6 @@ export class ReactRender implements LmlASTVisitor {
             trail = " ";
 
         return node.value + trail;
-    }
-
-    visitBoolean(
-        node: BooleanNode,
-        args?: Record<string, any>
-    ) {
-        return node.value
     }
 
     visitNumber(
