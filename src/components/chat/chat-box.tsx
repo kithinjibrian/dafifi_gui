@@ -18,11 +18,6 @@ export const ChatBox = ({ sendMessage }) => {
 
         let json = JSON.stringify(newMessage);
 
-        // Remove outer quotes if the whole thing is a quoted string
-        if (json.startsWith('"') && json.endsWith('"')) {
-            json = json.slice(1, -1);
-        }
-
         const result = sendMessage({
             message: `p{ ${json} }`,
             sender: "user",
