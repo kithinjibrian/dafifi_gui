@@ -19,6 +19,7 @@ import {
     LiNode,
     lml,
     LmlASTVisitor,
+    NoSpaceNode,
     NumberNode,
     OlNode,
     ParagraphNode,
@@ -315,6 +316,13 @@ export class ReactRender implements LmlASTVisitor {
                 key={this.get_key("a")}>
             </img>
         )
+    }
+
+    visitNoSpace(
+        node: NoSpaceNode,
+        args?: Record<string, any>
+    ) {
+        this.visit(node.body);
     }
 
     visitString(
