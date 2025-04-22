@@ -17,7 +17,7 @@ export const ChatBox = ({ sendMessage }) => {
             now.getMinutes().toString().padStart(2, '0');
 
         const result = sendMessage({
-            message: `p{ "${newMessage}" }`,
+            message: `p{ "${JSON.stringify(newMessage)}" }`,
             sender: "user",
             time: time,
             mock
