@@ -16,12 +16,20 @@ export const ChatBox = ({ sendMessage }) => {
         const time = now.getHours().toString().padStart(2, '0') + ":" +
             now.getMinutes().toString().padStart(2, '0');
 
+        let json = JSON.stringify(newMessage);
+
+        // Remove outer quotes if the whole thing is a quoted string
+        if (json.startsWith('"') && json.endsWith('"')) {
+            json = json.slice(1, -1);
+        }
+
         const result = sendMessage({
-            message: `p{ "${JSON.stringify(newMessage).replace(/"/g, '\\"')}" }`,
+            message: `p{ ${json} }`,
             sender: "user",
-            time: time,
+            time,
             mock
-        })
+        });
+
 
         setNewMessage("");
 
