@@ -37,7 +37,6 @@ import { useChatsStore } from "@/store/chats";
 export class ReactRender implements LmlASTVisitor {
     private extensions: Extension<any>[] = [];
     private key: number = 0;
-    private metadata = new Map();
 
     private get_key(name: string) {
         return `${name}-${this.key++}`
@@ -108,7 +107,7 @@ export class ReactRender implements LmlASTVisitor {
         args?: Record<string, any>
     ) {
         return node.body
-            .map(src => this.visit(src, { ...args, space: node.body.length > 1 ? true : false }));
+            .map(src => this.visit(src, args));
     }
 
     visitH1(
@@ -196,7 +195,7 @@ export class ReactRender implements LmlASTVisitor {
         return (
             <p
                 key={this.get_key("p")}
-                className="mb-2" >
+                className="mb-3" >
                 {this.visit(node.body, args)}
             </p >
         )
@@ -272,7 +271,9 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <Button
-                key={this.get_key("button")} >
+                key={this.get_key("button")}
+                variant={"ghost"}
+            >
                 {this.visit(node.body, args)}
             </Button>
         )
@@ -320,11 +321,7 @@ export class ReactRender implements LmlASTVisitor {
         node: StringNode,
         args?: Record<string, any>
     ) {
-        let trail = "";
-        if (args?.space)
-            trail = " ";
-
-        return node.value + trail;
+        return node.value;
     }
 
     visitNumber(
