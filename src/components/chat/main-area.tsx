@@ -64,7 +64,7 @@ export const MainArea = () => {
     );
 
     return (
-        <div className="relative flex flex-col h-[95%] md:h-full w-full pt-10 md:pt-30">
+        <div className="relative flex flex-col h-[95%] md:h-full w-full pt-10 md:pt-5">
             {active && (
                 <MessageList
                     messages={active.messages}

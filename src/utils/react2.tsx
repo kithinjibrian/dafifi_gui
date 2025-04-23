@@ -6,6 +6,7 @@ import {
     BlockNode,
     BNode,
     ButtonNode,
+    CNode,
     CodeNode,
     DocumentNode,
     ElementListNode,
@@ -242,27 +243,50 @@ export class ReactRender implements LmlASTVisitor {
         )
     }
 
-    visitB(
-        node: BNode,
-        args?: Record<string, any>
-    ) {
+    visitB(node: BNode, args?: Record<string, any>) {
+        const body = this.visit(node.body, args);
         return (
-            <strong
-                key={this.get_key("strong")} >
-                {this.visit(node.body, args)}
+            <strong key={this.get_key("strong")}>
+                {node.no_space ? body : `\u00A0${body}`}
             </strong>
-        )
+        );
     }
 
     visitI(
         node: INode,
         args?: Record<string, any>
     ) {
+        const body = this.visit(node.body, args);
         return (
             <em
                 key={this.get_key("em")} >
-                {this.visit(node.body, args)}
+                {node.no_space ? body : `\u00A0${body}`}
             </em>
+        )
+    }
+
+    visitC(node: CNode, args?: Record<string, any>) {
+        const body = this.visit(node.body, args);
+        return (
+            node.no_space ? (
+                <code
+                    className="px-1 rounded border font-mono text-sm"
+                    key={this.get_key("em")}
+                >
+                    {body}
+                </code>
+            ) : (
+                <span
+                    key={this.get_key("em")}
+                >
+                    {" "}
+                    <code
+                        className="px-1 rounded border font-mono text-sm"
+                    >
+                        {body}
+                    </code>
+                </span>
+            )
         )
     }
 
