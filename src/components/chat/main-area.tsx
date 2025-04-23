@@ -64,14 +64,14 @@ export const MainArea = () => {
     );
 
     return (
-        <div className="flex flex-col h-[95%] md:h-full w-full pt-10 md:pt-30">
+        <div className="relative flex flex-col h-[95%] md:h-full w-full pt-10 md:pt-30">
             {active && (
                 <MessageList
                     messages={active.messages}
                     messagesEndRef={messagesEndRef}
                 />
             )}
-            <div className="bottom-0 flex p-1 w-full shadow-lg justify-center bg-background">
+            <div className="fixed md:relative bottom-0 flex p-1 w-full shadow-lg justify-center bg-background">
                 <ChatBox sendMessage={handleSendMessage} />
             </div>
         </div>
