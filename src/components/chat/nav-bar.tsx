@@ -5,6 +5,7 @@ import { MessageCircle, Plus } from "lucide-react";
 import { NewChat } from "./new-chat";
 import { Chats } from "./chats";
 import { useChatsStore } from "@/store/chats";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const navItems = [
     { value: 'New Chat', icon: Plus, content: NewChat },
@@ -12,6 +13,8 @@ const navItems = [
 ]
 
 export const NavBar = (panelRef: any) => {
+    const isMobile = useIsMobile();
+
     const { activeTab, setActiveTab } = useChatsStore();
     const [isCollapsed, setIsCollapsed] = useState(Array(navItems.length).fill(0));
 
@@ -33,7 +36,7 @@ export const NavBar = (panelRef: any) => {
     const renderNavItems = () =>
         navItems.map((item, index) => (
             <TabsTrigger
-                onClick={() => setCollapse(index)}
+                onClick={() => !isMobile && setCollapse(index)}
                 value={item.value}
                 key={item.value}
                 className="bg-background w-full border-l-4 border-l-transparent data-[state=active]:border-l-sky-900 data-[state=active]:shadow-none">

@@ -8,6 +8,10 @@ import { useChatsStore } from "@/store/chats";
 import { useEffect } from "react";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useAuthStore } from "@/store/auth";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { AppSidebar } from "@/components/mobile/sidebar";
+import { MobileHeader } from "@/components/mobile/header";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 const panels: PanelProps[] = [
     {
@@ -32,6 +36,7 @@ const panels: PanelProps[] = [
 ];
 
 export default function Chat() {
+    const isMobile = useIsMobile();
     const { fetchChats } = useChatsStore();
 
     const { user } = useProtectedRoute();
@@ -50,8 +55,22 @@ export default function Chat() {
 
     return (
         <>
-            <Header />
-            <RenderPanels panels={panels} direction="horizontal" />
+            {isMobile ? (
+                <>
+                    <SidebarProvider>
+                        <div className="w-full">
+                            <AppSidebar />
+                            <MobileHeader />
+                            <Home />
+                        </div>
+                    </SidebarProvider>
+                </>
+            ) : (
+                <>
+                    <Header />
+                    <RenderPanels panels={panels} direction="horizontal" />
+                </>
+            )}
         </>
     )
 }

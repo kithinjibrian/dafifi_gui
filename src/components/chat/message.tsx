@@ -24,7 +24,7 @@ export const Message = ({ message, isGrouped }) => {
 
 export const MessageGroup = ({ group }) => {
     return (
-        <div className="mb-4">
+        <div className="mb-2 md:mb-4 w-full">
             <div className={`flex ${group.sender === "user" ? "justify-end" : "justify-start"}`}>
                 {/* Profile pic for "them" messages */}
                 {group.sender === "assistant" && (
@@ -87,7 +87,7 @@ export const MessageList = ({ messages, messagesEndRef }) => {
     const groupedMessages = groupMessages(messages);
 
     return (
-        <ScrollArea className="flex-1 p-4 h-3/4 w-full">
+        <ScrollArea className="flex-1 h-[85%] md:h-full w-full p-4">
             {groupedMessages.map((group, index) => (
                 <MessageGroup
                     key={index}
@@ -97,5 +97,6 @@ export const MessageList = ({ messages, messagesEndRef }) => {
             <div className="py-10"></div>
             <div ref={messagesEndRef} />
         </ScrollArea>
+
     );
 };

@@ -5,10 +5,14 @@ import { MainArea } from "@/components/chat/main-area";
 import { NavBar } from "@/components/chat/nav-bar";
 import { PanelProps, RenderPanels } from "@/components/chat/render-panels";
 import { useChatsStore } from "@/store/chats";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useAuthStore } from "@/store/auth";
 import { Artifact } from "@/components/chat/artifact";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/mobile/sidebar";
+import { MobileHeader } from "@/components/mobile/header";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const panels: PanelProps[] = [
     {
@@ -32,6 +36,7 @@ const panels: PanelProps[] = [
 ];
 
 export default function Chat() {
+    const isMobile = useIsMobile();
     const { fetchChats } = useChatsStore();
 
     const { user } = useProtectedRoute();
@@ -48,10 +53,31 @@ export default function Chat() {
             fetchChats();
     }, [isAuthenticated]);
 
+    const [open, setOpen] = useState(false)
+
     return (
         <>
-            <Header />
-            <RenderPanels panels={panels} direction="horizontal" />
+            {isMobile ? (
+                <>
+                    <SidebarProvider open={open} onOpenChange={setOpen}>
+                        <div className="w-full">
+                            <AppSidebar />
+
+                            {!open && (
+                                <MobileHeader />
+                            )}
+
+                            <MainArea />
+                        </div>
+                    </SidebarProvider>
+                </>
+            ) : (
+                <>
+                    <Header />
+                    <RenderPanels panels={panels} direction="horizontal" />
+                </>
+            )
+            }
         </>
     )
 }

@@ -4,14 +4,12 @@ import { useRouter } from "next/navigation";
 import { ChatBox } from "../chat/chat-box";
 import { useChatsStore } from "@/store/chats";
 import { Message } from "@/store/message";
-import { ReactRender } from "@/utils/react2";
 
 export const Home = () => {
     const router = useRouter();
     const {
         sendMessage,
         fetchChat,
-        getMessage
     } = useChatsStore();
 
     const handleHeader = async (data: any) => {
