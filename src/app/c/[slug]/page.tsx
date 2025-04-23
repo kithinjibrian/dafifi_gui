@@ -60,11 +60,13 @@ export default function Chat() {
             {isMobile ? (
                 <>
                     <SidebarProvider open={open} onOpenChange={setOpen}>
-                        <div className="w-full">
+                        <div className="h-screen w-full">
                             <AppSidebar />
 
                             {!open && (
-                                <MobileHeader />
+                                <div className="relative">
+                                    <MobileHeader />
+                                </div>
                             )}
 
                             <MainArea />
