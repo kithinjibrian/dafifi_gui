@@ -29,11 +29,6 @@ export const Chats = () => {
     const [selectAll, setSelectAll] = useState<boolean>(false);
     const [starredAll, setStarredAll] = useState<boolean>(false);
 
-    const handleMenuClick = (chatId: number, e: React.MouseEvent) => {
-        e.stopPropagation(); // Prevents chat selection when clicking the menu
-        setOpenMenu(openMenu === chatId ? null : chatId);
-    };
-
     // 🟡 Filtered categories
     const starredChats = chats.filter(chat => chat.starred);
     const recentChats = chats.filter(chat => !chat.starred);
@@ -95,7 +90,7 @@ export const Chats = () => {
                                 selectMode={selectMode}
                                 setSelectMode={setSelectMode}
                                 openMenu={openMenu}
-                                handleMenuClick={handleMenuClick}
+                                setOpenMenu={setOpenMenu}
                                 setChats={setChats}
                                 deleteChats={_deleteChats}
                                 starChats={starChats}
@@ -117,7 +112,7 @@ export const Chats = () => {
                                 selectMode={selectMode}
                                 setSelectMode={setSelectMode}
                                 openMenu={openMenu}
-                                handleMenuClick={handleMenuClick}
+                                setOpenMenu={setOpenMenu}
                                 setChats={setChats}
                                 deleteChats={_deleteChats}
                                 starChats={starChats}
@@ -136,7 +131,7 @@ const ChatItem = ({
     activeChat,
     setActiveChat,
     openMenu,
-    handleMenuClick,
+    setOpenMenu,
     setChats,
     selectMode,
     setSelectMode,
@@ -189,17 +184,29 @@ const ChatItem = ({
             </div>
 
             {/* More Options Menu */}
-            <DropdownMenu open={openMenu === chat.id} onOpenChange={() => handleMenuClick(chat.id, event)}>
+            <DropdownMenu
+                open={openMenu === chat.id}
+                onOpenChange={(isOpen) => {
+                    if (!isOpen) setOpenMenu(null);
+                }}
+            >
                 <DropdownMenuTrigger asChild>
                     <div
-                        onClick={(e) => handleMenuClick(chat.id, e)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            setOpenMenu(openMenu === chat.id ? null : chat.id);
+                        }}
                         className="p-1 rounded hover:bg-gray-700 cursor-pointer transition-opacity opacity-50 group-hover:opacity-100"
                     >
                         <MoreVertical size={20} />
                     </div>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent className="w-40 p-1 rounded-lg">
+                <DropdownMenuContent
+                    className="w-40 p-1 rounded-lg"
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <DropdownMenuItem onClick={toggleSelected}>
                         <SquareMousePointer className="mr-2" />
                         Select
