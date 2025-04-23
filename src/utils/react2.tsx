@@ -361,7 +361,7 @@ export class ReactRender implements LmlASTVisitor {
         return (
             <div
                 key={this.get_key("code")}
-                className="w-full border rounded-md m-2 p-0 min-w-40"
+                className="w-full max-w-[70vw] border rounded-md m-2 p-0 min-w-40"
             >
                 <div className="bg-card border-b p-2 flex justify-between items-center">
                     <span>{attr.lang}</span>
@@ -397,7 +397,12 @@ export class ReactRender implements LmlASTVisitor {
                 <SyntaxHighlighter
                     language={"rust"}
                     style={materialDark}
-                    customStyle={{ margin: "0" }}
+                    customStyle={{
+                        margin: 0,
+                        padding: "1rem",
+                        minWidth: "100%",
+                        boxSizing: "border-box"
+                    }}
                 >
                     {code}
                 </SyntaxHighlighter>
