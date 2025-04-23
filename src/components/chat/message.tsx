@@ -88,7 +88,7 @@ export const MessageList = ({ messages, messagesEndRef }) => {
     const groupedMessages = groupMessages(messages);
 
     return (
-        <ScrollArea className="flex-1 h-[85vh] md:h-full w-full p-4">
+        <ScrollArea className="flex-1 h-[90%] md:h-full w-full p-4">
             {groupedMessages.map((group, index) => (
                 <MessageGroup
                     key={index}

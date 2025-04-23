@@ -64,7 +64,7 @@ export const MainArea = () => {
     );
 
     return (
-        <div className="flex flex-col h-full w-full pt-10 md:pt-30">
+        <div className="flex flex-col h-[95%] md:h-full w-full pt-10 md:pt-30">
             {active && (
                 <MessageList
                     messages={active.messages}
