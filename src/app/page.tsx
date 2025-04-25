@@ -51,7 +51,7 @@ export default function Chat() {
     useEffect(() => {
         if (isAuthenticated)
             fetchChats();
-    }, [isAuthenticated]);
+    }, [user, isAuthenticated]);
 
     return (
         <>

@@ -34,7 +34,9 @@ import { Copy, Pencil, Play } from "lucide-react";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useCodeStore } from "@/store/code";
 import { Message } from "@/store/message";
-import { useChatsStore } from "@/store/chats";
+import { useTextStore } from "@/store/text";
+import { open_artifact } from "@/components/utils/artifacts";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export class ReactRender implements LmlASTVisitor {
     private extensions: Extension<any>[] = [];
@@ -294,10 +296,13 @@ export class ReactRender implements LmlASTVisitor {
         node: ButtonNode,
         args?: Record<string, any>
     ) {
+        const attr = this.visit(node.attributes);
+
         return (
             <Button
                 key={this.get_key("button")}
-                variant={"ghost"}
+                variant={"outline"}
+                className="rounded-full"
             >
                 {this.visit(node.body, args)}
             </Button>
@@ -371,6 +376,7 @@ export class ReactRender implements LmlASTVisitor {
         node: CodeNode,
         args?: Record<string, any>
     ) {
+        const mobile = useIsMobile();
         const attr = this.visit(node.attributes);
 
         const code = this.visit(node.body, args);
@@ -411,7 +417,15 @@ export class ReactRender implements LmlASTVisitor {
                         <Button
                             variant={"ghost"}
                             className="text-white p-1 rounded"
-                            onClick={() => { }}
+                            onClick={() => {
+                                const write = useTextStore.getState().write;
+                                write(code[0]);
+                                open_artifact(mobile, {
+                                    artifact: "coder",
+                                    async save() {
+                                    }
+                                })
+                            }}
                         >
                             <Pencil />
                             Edit
@@ -443,6 +457,12 @@ export class ReactRender implements LmlASTVisitor {
         let key = this.visit(node.key);
         let value = this.visit(node.value);
 
+        switch (key) {
+            case "onclick":
+                this.exec(value);
+                break;
+        }
+
         return {
             [key]: value
         }
@@ -450,5 +470,9 @@ export class ReactRender implements LmlASTVisitor {
 
     visitSinkhole(node: SinkholeNode, args?: Record<string, any>) {
         return;
+    }
+
+    exec(code: string) {
+        //  console.log(code);
     }
 }

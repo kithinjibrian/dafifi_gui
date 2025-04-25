@@ -9,7 +9,7 @@ export interface PanelProps {
     id: string | number;
     minSize?: number;
     maxSize?: number;
-    content?: (panelRef: React.RefObject<any>) => React.ReactNode;
+    content?: ({ panelRef }: { panelRef: React.RefObject<any> }) => React.ReactNode;
     defaultSize?: number;
     collapsible?: boolean;
     collapsedSize?: number;
@@ -43,7 +43,7 @@ export const RenderPanels: React.FC<RenderPanelsProps> = ({ panels, direction = 
                                 ref={props.collapsible ? panelRef : undefined}
                                 className="h-[93vh]"
                             >
-                                {content && content(panelRef)}
+                                {content && content({ panelRef })}
                             </ResizablePanel>
                         )}
 

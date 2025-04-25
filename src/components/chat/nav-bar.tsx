@@ -12,7 +12,7 @@ const navItems = [
     { value: 'Chats', icon: MessageCircle, content: Chats },
 ]
 
-export const NavBar = (panelRef: any) => {
+export const NavBar = ({ panelRef }: { panelRef: React.RefObject<any> | null }) => {
     const isMobile = useIsMobile();
 
     const { activeTab, setActiveTab } = useChatsStore();
@@ -25,6 +25,9 @@ export const NavBar = (panelRef: any) => {
             newState[index] = !s
             return newState
         })
+
+        if (!panelRef)
+            return;
 
         if (isCollapsed[index]) {
             panelRef.current.collapse();

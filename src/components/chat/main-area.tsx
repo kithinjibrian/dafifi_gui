@@ -6,7 +6,7 @@ import { Message } from "@/store/message";
 import { useParams, useRouter } from "next/navigation";
 
 
-export const MainArea = () => {
+export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }) => {
     const router = useRouter();
     const params = useParams<{ slug: string }>();
 

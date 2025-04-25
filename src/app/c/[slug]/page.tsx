@@ -13,6 +13,8 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/mobile/sidebar";
 import { MobileHeader } from "@/components/mobile/header";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { MobileArtifact } from "@/components/mobile/artifact";
+
 
 const panels: PanelProps[] = [
     {
@@ -68,8 +70,8 @@ export default function Chat() {
                                     <MobileHeader />
                                 </div>
                             )}
-
-                            <MainArea />
+                            <MainArea panelRef={null} />
+                            <MobileArtifact />
                         </div>
                     </SidebarProvider>
                 </>
