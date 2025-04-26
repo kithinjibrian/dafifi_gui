@@ -61,9 +61,10 @@ export default function Chat() {
         builtin["user_auto_answer"] = {
             type: "function",
             signature: "<T, U>(args: T) -> U",
-            exec: (args: any[]) => {
+            async: true,
+            exec: async (args: any[]) => {
                 let json = JSON.stringify(args[0]);
-                sendMessageWrap({
+                await sendMessageWrap({
                     message: `p{ ${json} }`,
                     time: time(),
                     sender: "user",
