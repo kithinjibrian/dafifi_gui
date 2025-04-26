@@ -14,6 +14,8 @@ import { AppSidebar } from "@/components/mobile/sidebar";
 import { MobileHeader } from "@/components/mobile/header";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileArtifact } from "@/components/mobile/artifact";
+import { builtin } from "@kithinji/tlugha-browser";
+import { time } from "@/utils/time";
 
 
 const panels: PanelProps[] = [
@@ -39,7 +41,7 @@ const panels: PanelProps[] = [
 
 export default function Chat() {
     const isMobile = useIsMobile();
-    const { fetchChats } = useChatsStore();
+    const { fetchChats, sendMessageWrap } = useChatsStore();
 
     const { user } = useProtectedRoute();
     const { isAuthenticated, refreshToken } = useAuthStore();
@@ -53,6 +55,21 @@ export default function Chat() {
     useEffect(() => {
         if (isAuthenticated)
             fetchChats();
+    }, [isAuthenticated]);
+
+    useEffect(() => {
+        builtin["user_auto_answer"] = {
+            type: "function",
+            signature: "<T, U>(args: T) -> U",
+            exec: (args: any[]) => {
+                let json = JSON.stringify(args[0]);
+                sendMessageWrap({
+                    message: `p{ ${json} }`,
+                    time: time(),
+                    sender: "user",
+                })
+            }
+        }
     }, [isAuthenticated]);
 
     const [open, setOpen] = useState(false)

@@ -41,7 +41,7 @@ export const RenderPanels: React.FC<RenderPanelsProps> = ({ panels, direction = 
                             <ResizablePanel
                                 {...props}
                                 ref={props.collapsible ? panelRef : undefined}
-                                className="h-[93vh]"
+                                className="h-[93vh] w-full"
                             >
                                 {content && content({ panelRef })}
                             </ResizablePanel>

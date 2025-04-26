@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Switch } from "@/components/ui/switch"
 import { Label } from "../ui/label";
+import { time } from "@/utils/time";
 
 export const ChatBox = ({ sendMessage }) => {
     const [newMessage, setNewMessage] = useState("");
@@ -12,16 +13,12 @@ export const ChatBox = ({ sendMessage }) => {
     const handleSend = () => {
         if (newMessage.trim() === "") return;
 
-        const now = new Date();
-        const time = now.getHours().toString().padStart(2, '0') + ":" +
-            now.getMinutes().toString().padStart(2, '0');
-
         let json = JSON.stringify(newMessage);
 
         const result = sendMessage({
             message: `p{ ${json} }`,
             sender: "user",
-            time,
+            time: time(),
             mock
         });
 

@@ -12,9 +12,8 @@ export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }
 
     const {
         active,
-        sendMessage,
-        pushMessage,
-        fetchChat
+        fetchChat,
+        sendMessageWrap
     } = useChatsStore();
 
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -35,44 +34,16 @@ export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }
         }
     }, [params.slug, active, fetchChat, router]);
 
-    const handleSendMessage = useCallback(async (msg: Message) => {
-        if (!active) return;
-
-        const handleHeader = async (data: any) => {
-            pushMessage({ ...msg, id: data.umessage_id });
-            pushMessage({
-                id: data.imessage_id,
-                sender: "assistant",
-                message: "",
-                mock: true,
-            });
-        };
-
-        try {
-            await sendMessage(
-                { ...msg, chat_id: active.id },
-                handleHeader,
-                () => { }
-            );
-            return "success";
-        } catch (err) {
-            console.error("Error sending message:", err);
-            return "error";
-        }
-    },
-        [pushMessage, sendMessage, active]
-    );
-
     return (
-        <div className="relative flex flex-col h-[95%] md:h-full w-full pt-10 md:pt-30">
+        <div className="relative flex flex-col h-[95%] md:h-full w-full pt-10 md:pt-5">
             {active && (
                 <MessageList
                     messages={active.messages}
                     messagesEndRef={messagesEndRef}
                 />
             )}
-            <div className="fixed md:relative bottom-0 flex p-1 w-full shadow-lg justify-center bg-background">
-                <ChatBox sendMessage={handleSendMessage} />
+            <div className="fixed bottom-0 md:relative w-full flex p-1 shadow-lg items-center bg-background">
+                <ChatBox sendMessage={sendMessageWrap} />
             </div>
         </div>
     );

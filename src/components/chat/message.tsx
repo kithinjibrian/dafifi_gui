@@ -2,9 +2,26 @@ import { Avatar, AvatarFallback } from "../ui/avatar";
 import { ReactRender } from "@/utils/react2";
 import { ScrollArea } from "../ui/scroll-area";
 import { Message as MessageTYpe } from "@/store/message";
+import { useEffect, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Message = ({ message, isGrouped }: { message: MessageTYpe }) => {
-    const { react } = new ReactRender(message).run();
+    const [react, setReact] = useState([]);
+    const is_mobile = useIsMobile();
+
+    useEffect(() => {
+        let a = async () => {
+            const { react } = await new ReactRender(
+                message,
+                "",
+                false,
+                is_mobile
+            ).run();
+            setReact(react);
+        }
+        a();
+    }, [message]);
+
 
     return (
         <>
@@ -88,7 +105,7 @@ export const MessageList = ({ messages, messagesEndRef }) => {
     const groupedMessages = groupMessages(messages);
 
     return (
-        <ScrollArea className="flex-1 h-[90%] md:h-full w-full p-4">
+        <ScrollArea className="flex-1 h-[90%] md:h-[80%] w-full p-4">
             {groupedMessages.map((group, index) => (
                 <MessageGroup
                     key={index}

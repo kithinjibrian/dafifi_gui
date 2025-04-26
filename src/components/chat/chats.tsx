@@ -18,6 +18,7 @@ import Link from 'next/link';
 
 import { useRouter } from 'next/navigation'
 import { ReactRender } from '@/utils/react2';
+import { Message } from '@/store/message';
 
 export const Chats = () => {
     const router = useRouter()
@@ -159,10 +160,15 @@ const ChatItem = ({
     const [react, setReact] = useState([]);
 
     useEffect(() => {
-        const { react } = new ReactRender({
-            message: chat.title
-        }).run();
-        setReact(react);
+        let a = async () => {
+            const { react } = await new ReactRender({
+                message: chat.title
+            } as Message
+            ).run();
+            setReact(react);
+        }
+
+        a()
     }, [])
 
     return (

@@ -27,6 +27,9 @@ import {
     SinkholeNode,
     StringNode
 } from "@kithinji/lml";
+
+import { exec } from "@kithinji/tlugha-browser"
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SyntaxHighlighter from "react-syntax-highlighter";
@@ -49,7 +52,8 @@ export class ReactRender implements LmlASTVisitor {
     constructor(
         public message: Message,
         public chat_id: string = "",
-        public save: boolean = false
+        public save: boolean = false,
+        public mobile: boolean = false
     ) { }
 
     public extension(p: Extension<any>) {
@@ -65,16 +69,16 @@ export class ReactRender implements LmlASTVisitor {
         this.extensions.forEach(extension => extension.beforeAccept?.(node, this, args));
     }
 
-    public visit(node?: ASTNode, args?: Record<string, any>): any {
+    public async visit(node?: ASTNode, args?: Record<string, any>): Promise<any> {
         if (node == undefined) return "";
 
-        return node.accept(this, args);
+        return await node.accept(this, args);
     }
 
-    public run() {
+    public async run() {
         try {
             const ast = lml(this.message.message);
-            const react = this.visit(ast)
+            const react = await this.visit(ast)
             if (this.save) {
                 const exec = useCodeStore.getState().exec;
                 exec(this.chat_id)
@@ -87,34 +91,44 @@ export class ReactRender implements LmlASTVisitor {
         }
     }
 
-    visitDocument(
+    async visitDocument(
         node: DocumentNode,
         args?: Record<string, any>
     ) {
         return (
             <div>
-                {this.visit(node.document, args)}
+                {await this.visit(node.document, args)}
             </div>
         );
     }
 
-    visitElementList(
+    async visitElementList(
         node: ElementListNode,
         args?: Record<string, any>
     ) {
-        return node.sources
-            .map(src => this.visit(src, args))
+        const arr = []
+
+        for (const src of node.sources) {
+            arr.push(await this.visit(src, args))
+        }
+
+        return arr;
     }
 
-    visitBlock(
+    async visitBlock(
         node: BlockNode,
         args?: Record<string, any>
     ) {
-        return node.body
-            .map(src => this.visit(src, args));
+        const arr = []
+
+        for (const src of node.body) {
+            arr.push(await this.visit(src, args))
+        }
+
+        return arr;
     }
 
-    visitH1(
+    async visitH1(
         node: H1Node,
         args?: Record<string, any>
     ) {
@@ -122,12 +136,12 @@ export class ReactRender implements LmlASTVisitor {
             <h1
                 key={this.get_key("h1")}
                 className="mb-2 text-4xl">
-                {this.visit(node.body, args)}
+                {await this.visit(node.body, args)}
             </h1>
         )
     }
 
-    visitH2(
+    async visitH2(
         node: H1Node,
         args?: Record<string, any>
     ) {
@@ -135,12 +149,12 @@ export class ReactRender implements LmlASTVisitor {
             <h2
                 key={this.get_key("h2")}
                 className="mb-2 text-3xl">
-                {this.visit(node.body, args)}
+                {await this.visit(node.body, args)}
             </h2>
         )
     }
 
-    visitH3(
+    async visitH3(
         node: H1Node,
         args?: Record<string, any>
     ) {
@@ -148,12 +162,12 @@ export class ReactRender implements LmlASTVisitor {
             <h3
                 key={this.get_key("h3")}
                 className="mb-2 text-2xl">
-                {this.visit(node.body, args)}
+                {await this.visit(node.body, args)}
             </h3>
         )
     }
 
-    visitH4(
+    async visitH4(
         node: H1Node,
         args?: Record<string, any>
     ) {
@@ -161,12 +175,12 @@ export class ReactRender implements LmlASTVisitor {
             <h4
                 key={this.get_key("h4")}
                 className="mb-2 text-xl">
-                {this.visit(node.body, args)}
+                {await this.visit(node.body, args)}
             </h4>
         )
     }
 
-    visitH5(
+    async visitH5(
         node: H1Node,
         args?: Record<string, any>
     ) {
@@ -174,12 +188,12 @@ export class ReactRender implements LmlASTVisitor {
             <h5
                 key={this.get_key("h5")}
                 className="mb-2 text-lg">
-                {this.visit(node.body, args)}
+                {await this.visit(node.body, args)}
             </h5>
         )
     }
 
-    visitH6(
+    async visitH6(
         node: H1Node,
         args?: Record<string, any>
     ) {
@@ -187,12 +201,12 @@ export class ReactRender implements LmlASTVisitor {
             <h6
                 key={this.get_key("h6")}
                 className="mb-2 text-base">
-                {this.visit(node.body, args)}
+                {await this.visit(node.body, args)}
             </h6>
         )
     }
 
-    visitParagraph(
+    async visitParagraph(
         node: ParagraphNode,
         args?: Record<string, any>
     ) {
@@ -200,12 +214,12 @@ export class ReactRender implements LmlASTVisitor {
             <p
                 key={this.get_key("p")}
                 className="mb-3" >
-                {this.visit(node.body, args)}
+                {await this.visit(node.body, args)}
             </p >
         )
     }
 
-    visitOl(
+    async visitOl(
         node: OlNode,
         args?: Record<string, any>
     ) {
@@ -214,12 +228,12 @@ export class ReactRender implements LmlASTVisitor {
                 key={this.get_key("ol")}
                 className="list-decimal list-inside"
             >
-                {this.visit(node.body, args)}
+                {await this.visit(node.body, args)}
             </ol>
         )
     }
 
-    visitUl(
+    async visitUl(
         node: OlNode,
         args?: Record<string, any>
     ) {
@@ -228,25 +242,25 @@ export class ReactRender implements LmlASTVisitor {
                 key={this.get_key("ul")}
                 className="list-disc list-inside"
             >
-                {this.visit(node.body, args)}
+                {await this.visit(node.body, args)}
             </ul>
         )
     }
 
-    visitLi(
+    async visitLi(
         node: LiNode,
         args?: Record<string, any>
     ) {
         return (
             <li
                 key={this.get_key("li")} >
-                {this.visit(node.body, args)}
+                {await this.visit(node.body, args)}
             </li>
         )
     }
 
-    visitB(node: BNode, args?: Record<string, any>) {
-        const body = this.visit(node.body, args);
+    async visitB(node: BNode, args?: Record<string, any>) {
+        const body = await this.visit(node.body, args);
         return (
             <strong key={this.get_key("strong")}>
                 {node.no_space ? body : `\u00A0${body}`}
@@ -254,11 +268,11 @@ export class ReactRender implements LmlASTVisitor {
         );
     }
 
-    visitI(
+    async visitI(
         node: INode,
         args?: Record<string, any>
     ) {
-        const body = this.visit(node.body, args);
+        const body = await this.visit(node.body, args);
         return (
             <em
                 key={this.get_key("em")} >
@@ -267,8 +281,8 @@ export class ReactRender implements LmlASTVisitor {
         )
     }
 
-    visitC(node: CNode, args?: Record<string, any>) {
-        const body = this.visit(node.body, args);
+    async visitC(node: CNode, args?: Record<string, any>) {
+        const body = await this.visit(node.body, args);
         return (
             node.no_space ? (
                 <code
@@ -287,43 +301,53 @@ export class ReactRender implements LmlASTVisitor {
                     >
                         {body}
                     </code>
+                    {" "}
                 </span>
             )
         )
     }
 
-    visitButton(
+    async visitButton(
         node: ButtonNode,
         args?: Record<string, any>
     ) {
-        const attr = this.visit(node.attributes);
+        const attr = await this.visit(node.attributes);
 
         return (
             <Button
                 key={this.get_key("button")}
                 variant={"outline"}
                 className="rounded-full"
+                onClick={async () => {
+                    for (const [key, value] of Object.entries(attr)) {
+                        if (key == "onclick") {
+                            await this.exec(`fun main(): unit {
+                                ${value as string}
+                            }`);
+                        }
+                    }
+                }}
             >
-                {this.visit(node.body, args)}
+                {await this.visit(node.body, args)}
             </Button>
         )
     }
 
-    visitInput(
+    async visitInput(
         node: InputNode,
         args?: Record<string, any>
     ) {
         return (
             <Input
-                key={this.get_key("input")} />
+                key={await this.get_key("input")} />
         )
     }
 
-    visitLink(
+    async visitLink(
         node: LinkNode,
         args?: Record<string, any>
     ) {
-        const attr = this.visit(node.attributes);
+        const attr = await this.visit(node.attributes);
         return (
             <a
                 target="_blank"
@@ -335,51 +359,51 @@ export class ReactRender implements LmlASTVisitor {
         )
     }
 
-    visitImg(
+    async visitImg(
         node: ImageNode,
         args?: Record<string, any>
     ) {
         return (
             <img
                 src=""
-                key={this.get_key("a")}>
+                key={await this.get_key("a")}>
             </img>
         )
     }
 
-    visitNoSpace(
+    async visitNoSpace(
         node: NoSpaceNode,
         args?: Record<string, any>
     ) {
-        this.visit(node.body);
+        await this.visit(node.body);
     }
 
-    visitString(
+    async visitString(
         node: StringNode,
         args?: Record<string, any>
     ) {
         return node.value;
     }
 
-    visitNumber(
+    async visitNumber(
         node: NumberNode,
         args?: Record<string, any>
     ) {
         return node.value
     }
 
-    visitIdentifier(node: IdentifierNode, args?: Record<string, any>) {
+    async visitIdentifier(node: IdentifierNode, args?: Record<string, any>) {
         return node.name
     }
 
-    visitCode(
+    async visitCode(
         node: CodeNode,
         args?: Record<string, any>
     ) {
-        const mobile = useIsMobile();
-        const attr = this.visit(node.attributes);
+        const mobile = this.mobile;
+        const attr = await this.visit(node.attributes);
 
-        const code = this.visit(node.body, args);
+        const code = await this.visit(node.body, args);
 
         if (this.save) {
             if (attr.lang === "lugha" && attr.run == "true") {
@@ -448,31 +472,33 @@ export class ReactRender implements LmlASTVisitor {
         )
     }
 
-    visitAttributeList(node: AttributeListNode) {
-        let array = node.attributes.map(attrs => this.visit(attrs));
+    async visitAttributeList(node: AttributeListNode) {
+        let array = [];
+
+        for (const attrs of node.attributes) {
+            array.push(await this.visit(attrs))
+        }
+
         return Object.assign({}, ...array);
     }
 
-    visitAttribute(node: AttributeNode) {
-        let key = this.visit(node.key);
-        let value = this.visit(node.value);
-
-        switch (key) {
-            case "onclick":
-                this.exec(value);
-                break;
-        }
+    async visitAttribute(node: AttributeNode) {
+        let key = await this.visit(node.key);
+        let value = await this.visit(node.value);
 
         return {
             [key]: value
         }
     }
 
-    visitSinkhole(node: SinkholeNode, args?: Record<string, any>) {
+    async visitSinkhole(node: SinkholeNode, args?: Record<string, any>) {
         return;
     }
 
-    exec(code: string) {
-        //  console.log(code);
+    async exec(code: string) {
+        console.log(await exec({
+            code: code,
+            std: "http://localhost:4000"
+        }));
     }
 }

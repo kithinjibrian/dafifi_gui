@@ -111,6 +111,33 @@ const createChatSlice: StateCreator<
             }
         }
     },
+    sendMessageWrap: async (msg: Message) => {
+        let active = get().active;
+
+        if (!active) return;
+
+        const handleHeader = async (data: any) => {
+            get().pushMessage({ ...msg, id: data.umessage_id });
+            get().pushMessage({
+                id: data.imessage_id,
+                sender: "assistant",
+                message: "",
+                mock: true,
+            });
+        };
+
+        try {
+            await get().sendMessage(
+                { ...msg, chat_id: active.id },
+                handleHeader,
+                () => { }
+            );
+            return "success";
+        } catch (err) {
+            console.error("Error sending message:", err);
+            return "error";
+        }
+    },
     sendAction: async (chat_id: string, code: string): Promise<Message> => {
         try {
             const response = await request.post("/action", { chat_id, code });
