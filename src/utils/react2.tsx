@@ -498,7 +498,7 @@ export class ReactRender implements LmlASTVisitor {
     async exec(code: string) {
         console.log(await exec({
             code: code,
-            std: "http://localhost:4000"
+            std: "https://chat.dafifi.net"
         }));
     }
 }
