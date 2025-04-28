@@ -49,8 +49,10 @@ export default function Chat() {
     }, [isAuthenticated, refreshToken]);
 
     useEffect(() => {
-        if (isAuthenticated)
+        if (isAuthenticated) {
+            console.log("fetching chats");
             fetchChats();
+        }
     }, [user, isAuthenticated]);
 
     return (

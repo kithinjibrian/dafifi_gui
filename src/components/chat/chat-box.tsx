@@ -7,7 +7,6 @@ export const ChatBox = ({ sendMessage }) => {
     const [newMessage, setNewMessage] = useState("");
     const textareaRef = useRef(null);
     const [loading, setLoading] = useState(true)
-    const [mock, setMock] = useState(true)
     const [run, setRun] = useState(true)
 
     const handleSend = () => {
@@ -18,8 +17,7 @@ export const ChatBox = ({ sendMessage }) => {
         const result = sendMessage({
             message: `p{ ${json} }`,
             sender: "user",
-            time: time(),
-            mock
+            time: time()
         });
 
 

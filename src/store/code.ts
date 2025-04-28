@@ -45,15 +45,13 @@ export const useCodeStore = create<CodeStore>((set, get) => ({
                     message: response.data.message,
                     sender: "tool",
                     time: "",
-                    chat_id,
-                    mock: true,
+                    chat_id
                 },
                     (header: any) => {
                         pushMessage({
                             id: header.imessage_id,
                             sender: "assistant",
-                            message: "",
-                            mock: true,
+                            message: ""
                         });
                     },
                     () => { }

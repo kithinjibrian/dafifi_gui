@@ -26,6 +26,7 @@ export interface ChatStore {
     updateMessage: (message_id: string, data: any) => void;
     appendMessage: (message_id: string, message: string) => void;
     sendMessage: (msg: Message, res: (data: string) => void, end: (data: any) => void) => void;
+    sendMessageWrap: (msg: Message) => void;
 }
 
 const createChatSlice: StateCreator<
@@ -122,7 +123,6 @@ const createChatSlice: StateCreator<
                 id: data.imessage_id,
                 sender: "assistant",
                 message: "",
-                mock: true,
             });
         };
 
@@ -150,8 +150,7 @@ const createChatSlice: StateCreator<
                 message: e.message,
                 sender: "tool",
                 time: "",
-                chat_id,
-                mock: true
+                chat_id
             };
         }
 

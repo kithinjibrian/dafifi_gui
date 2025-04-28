@@ -20,7 +20,6 @@ import {
     LiNode,
     lml,
     LmlASTVisitor,
-    NoSpaceNode,
     NumberNode,
     OlNode,
     ParagraphNode,
@@ -77,7 +76,7 @@ export class ReactRender implements LmlASTVisitor {
 
     public async run() {
         try {
-            const ast = lml(this.message.message);
+            const ast = await lml(this.message.message);
             const react = await this.visit(ast)
             if (this.save) {
                 const exec = useCodeStore.getState().exec;
@@ -263,7 +262,7 @@ export class ReactRender implements LmlASTVisitor {
         const body = await this.visit(node.body, args);
         return (
             <strong key={this.get_key("strong")}>
-                {node.no_space ? body : `\u00A0${body}`}
+                {body}
             </strong>
         );
     }
@@ -276,7 +275,7 @@ export class ReactRender implements LmlASTVisitor {
         return (
             <em
                 key={this.get_key("em")} >
-                {node.no_space ? body : `\u00A0${body}`}
+                {body}
             </em>
         )
     }
@@ -284,26 +283,12 @@ export class ReactRender implements LmlASTVisitor {
     async visitC(node: CNode, args?: Record<string, any>) {
         const body = await this.visit(node.body, args);
         return (
-            node.no_space ? (
-                <code
-                    className="px-1 rounded border font-mono text-sm"
-                    key={this.get_key("em")}
-                >
-                    {body}
-                </code>
-            ) : (
-                <span
-                    key={this.get_key("em")}
-                >
-                    {" "}
-                    <code
-                        className="px-1 rounded border font-mono text-sm"
-                    >
-                        {body}
-                    </code>
-                    {" "}
-                </span>
-            )
+            <code
+                className="px-1 rounded border font-mono text-sm"
+                key={this.get_key("em")}
+            >
+                {body}
+            </code>
         )
     }
 
@@ -366,16 +351,9 @@ export class ReactRender implements LmlASTVisitor {
         return (
             <img
                 src=""
-                key={await this.get_key("a")}>
+                key={this.get_key("a")}>
             </img>
         )
-    }
-
-    async visitNoSpace(
-        node: NoSpaceNode,
-        args?: Record<string, any>
-    ) {
-        await this.visit(node.body);
     }
 
     async visitString(

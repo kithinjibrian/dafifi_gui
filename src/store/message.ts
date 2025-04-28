@@ -3,7 +3,6 @@ import { StateCreator } from "zustand";
 
 export interface Message {
     id?: string;
-    mock: boolean;
     sender: string;
     message: string;
     time?: string;
