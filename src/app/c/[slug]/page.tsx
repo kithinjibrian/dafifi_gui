@@ -22,7 +22,7 @@ const panels: PanelProps[] = [
     {
         id: 1,
         content: NavBar,
-        defaultSize: 25,
+        defaultSize: 30,
         minSize: 10,
         maxSize: 70,
         collapsible: true,
