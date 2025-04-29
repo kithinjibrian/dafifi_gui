@@ -41,24 +41,32 @@ export const Message = ({ message, isGrouped }: { message: MessageTYpe }) => {
 };
 
 export const MessageGroup = ({ group }) => {
+
+    const isUser = group.sender === "user";
+
+    const senderAvatars = {
+        assistant: { fallback: "AI", className: "bg-indigo-500" },
+        tool: { fallback: "TL", className: "bg-orange-500" },
+    };
+
+    const avatar = senderAvatars[group.sender];
+
     return (
         <div className="mb-2 md:mb-4 w-full">
-            <div className={`flex ${group.sender === "user" ? "justify-end" : "justify-start"}`}>
+            <div className={`flex ${group.sender === "user" ? "justify-end" : "justify-start"} w-full`}>
                 {/* Profile pic for "them" messages */}
-                {group.sender === "assistant" && (
-                    <Avatar className="mr-2">
-                        <AvatarFallback className="bg-indigo-500">AI</AvatarFallback>
-                    </Avatar>
-                )}
-
-                {group.sender === "tool" && (
-                    <Avatar className="mr-2">
-                        <AvatarFallback className="bg-orange-500">TL</AvatarFallback>
-                    </Avatar>
-                )}
+                <div className="w-8 flex-shrink-0 mr-2">
+                    {!isUser && avatar && (
+                        <Avatar>
+                            <AvatarFallback className={avatar.className}>
+                                {avatar.fallback}
+                            </AvatarFallback>
+                        </Avatar>
+                    )}
+                </div>
 
                 {/* Message bubbles */}
-                <div className="max-w-3xl">
+                <div className="max-w-3xl flex flex-col">
                     {group.messages.map((msg, msgIndex) => (
                         <Message
                             key={msg.id}
