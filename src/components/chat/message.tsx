@@ -2,12 +2,21 @@ import { Avatar, AvatarFallback } from "../ui/avatar";
 import { ReactRender } from "@/utils/react2";
 import { ScrollArea } from "../ui/scroll-area";
 import { Message as MessageTYpe } from "@/store/message";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+function reducer(state, action) {
+    switch (action.type) {
+        case 'hideCode':
+            return { ...state, hideCode: !state.hideCode };
+        default:
+            return state;
+    }
+}
 
 export const Message = ({ message, isGrouped }: { message: MessageTYpe }) => {
     const [react, setReact] = useState([]);
-    const is_mobile = useIsMobile();
+    const [store, dispatch] = useReducer(reducer, { hideCode: false, is_mobile: useIsMobile() });
 
     useEffect(() => {
         let a = async () => {
@@ -15,12 +24,15 @@ export const Message = ({ message, isGrouped }: { message: MessageTYpe }) => {
                 message,
                 "",
                 false,
-                is_mobile
+                {
+                    mobile: [store.is_mobile, () => { }],
+                    hideCode: [store.hideCode, () => dispatch({ type: 'hideCode' })]
+                }
             ).run();
             setReact(react);
         }
         a();
-    }, [message]);
+    }, [message, store, dispatch]);
 
 
     return (

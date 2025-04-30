@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     ASTNode,
     AttributeListNode,
@@ -32,13 +32,12 @@ import { exec } from "@kithinji/tlugha-browser"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import SyntaxHighlighter from "react-syntax-highlighter";
-import { Copy, Pencil, Play } from "lucide-react";
+import { ChevronDown, Copy, Pencil, Play } from "lucide-react";
 import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useCodeStore } from "@/store/code";
 import { Message } from "@/store/message";
 import { useTextStore } from "@/store/text";
 import { open_artifact } from "@/components/utils/artifacts";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 export class ReactRender implements LmlASTVisitor {
     private extensions: Extension<any>[] = [];
@@ -52,7 +51,7 @@ export class ReactRender implements LmlASTVisitor {
         public message: Message,
         public chat_id: string = "",
         public save: boolean = false,
-        public mobile: boolean = false
+        public state: Record<string, any> = {}
     ) { }
 
     public extension(p: Extension<any>) {
@@ -390,7 +389,9 @@ export class ReactRender implements LmlASTVisitor {
         node: CodeNode,
         args?: Record<string, any>
     ) {
-        const mobile = this.mobile;
+        const [hideCode, setHideCode] = this.state.hideCode;
+
+        const mobile = this.state.mobile[0];
         const attr = await this.visit(node.attributes);
 
         const code = await this.visit(node.body, args);
@@ -408,8 +409,19 @@ export class ReactRender implements LmlASTVisitor {
                 className="w-full max-w-[70vw] border rounded-md m-2 p-0 min-w-40"
             >
                 <div className="bg-card border-b p-2 flex justify-between items-center">
-                    <span>{attr.lang}</span>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-row items-center">
+                        <Button
+                            variant={"ghost"}
+                            className="text-white p-1 rounded"
+                            onClick={() => {
+                                setHideCode()
+                            }}
+                        >
+                            <ChevronDown />
+                        </Button>
+                        <span>{attr.lang}</span>
+                    </div>
+                    <div className="flex space-x-1">
                         {attr.run && (
                             <Button
                                 variant={"ghost"}
@@ -417,7 +429,6 @@ export class ReactRender implements LmlASTVisitor {
                                 onClick={() => { /* Implement copy functionality here */ }}
                             >
                                 <Play />
-                                Run
                             </Button>
                         )}
                         <Button
@@ -426,7 +437,6 @@ export class ReactRender implements LmlASTVisitor {
                             onClick={() => { /* Implement copy functionality here */ }}
                         >
                             <Copy />
-                            Copy
                         </Button>
                         <Button
                             variant={"ghost"}
@@ -442,22 +452,23 @@ export class ReactRender implements LmlASTVisitor {
                             }}
                         >
                             <Pencil />
-                            Edit
                         </Button>
                     </div>
                 </div>
-                <SyntaxHighlighter
-                    language={"rust"}
-                    style={materialDark}
-                    customStyle={{
-                        margin: 0,
-                        padding: "1rem",
-                        minWidth: "100%",
-                        boxSizing: "border-box"
-                    }}
-                >
-                    {code}
-                </SyntaxHighlighter>
+                {hideCode && (
+                    <SyntaxHighlighter
+                        language={"rust"}
+                        style={materialDark}
+                        customStyle={{
+                            margin: 0,
+                            padding: "1rem",
+                            minWidth: "100%",
+                            boxSizing: "border-box"
+                        }}
+                    >
+                        {code}
+                    </SyntaxHighlighter>
+                )}
             </div >
         )
     }
