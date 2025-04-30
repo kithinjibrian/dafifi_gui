@@ -44,7 +44,6 @@ export const useCodeStore = create<CodeStore>((set, get) => ({
                     id: response.data.id,
                     message: response.data.message,
                     sender: "tool",
-                    time: "",
                     chat_id
                 },
                     (header: any) => {

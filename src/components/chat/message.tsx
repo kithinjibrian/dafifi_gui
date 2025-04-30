@@ -4,6 +4,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Message as MessageTYpe } from "@/store/message";
 import { useEffect, useReducer, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { time } from "@/utils/time";
 
 function reducer(state, action) {
     switch (action.type) {
@@ -45,7 +46,7 @@ export const Message = ({ message, isGrouped }: { message: MessageTYpe }) => {
             >
                 {react}
                 <div className="text-xs text-gray-300 text-right mt-1">
-                    {message.time}
+                    {time(message.createdAt)}
                 </div>
             </div>
         </>

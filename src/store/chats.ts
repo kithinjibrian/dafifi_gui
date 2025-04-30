@@ -1,6 +1,6 @@
 import { report_error, request } from "@/utils/request";
 import { create, StateCreator } from "zustand";
-import { createMessageSlice, Message, MessageStore } from "./message";
+import { Message } from "./message";
 import { createTabSlice, TabStore } from "./tab"
 import { ReactRender } from "@/utils/react2";
 
@@ -149,8 +149,8 @@ const createChatSlice: StateCreator<
                 id: "id",
                 message: e.message,
                 sender: "tool",
-                time: "",
-                chat_id
+                chat_id,
+                createdAt: e.createdAt
             };
         }
 
@@ -263,80 +263,8 @@ const createChatSlice: StateCreator<
 })
 
 export const useChatsStore = create<
-    ChatStore & TabStore & MessageStore
+    ChatStore & TabStore
 >((...a) => ({
     ...createChatSlice(...a),
-    ...createMessageSlice(...a),
     ...createTabSlice(...a)
 }))
-
-
-/**
- fetch(`https://api.dafifi.net/chat`, {
-                method: "POST",
-                credentials: 'include',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(msg)
-            }).then((response) => {
-
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
-
-                function read() {
-                    reader.read().then(({ done, value }) => {
-                        if (done) {
-                            // await end();
-                            return;
-                        }
-
-                        const chunk = decoder.decode(value, { stream: true });
-
-                        console.log("+++++++++++++++++++")
-                        console.log(chunk)
-
-                        // chunk.split("\n").filter(ch => ch !== "").map(async ch => {
-                        //     console.log(ch)
-                        // })
-                        read();
-                    });
-                }
-
-                read()
-            });
-
-
-            try {
-            const res = await fetch(`https://api.dafifi.net/chat`, {
-                method: "POST",
-                credentials: 'include',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(msg)
-            });
-
-            if (!res.ok) {
-                throw new Error(`HTTP error! Status: ${res.status}`);
-            }
-
-            const reader = res.body.getReader();
-            const decoder = new TextDecoder();
-            let buffer = '';
-
-            while (true) {
-                const { done, value } = await reader.read();
-
-                if (done) {
-                    return;
-                }
-
-                const chunk = decoder.decode(value, { stream: true });
-                console.log("+++++++++++++++++++")
-                console.log(chunk)
-            }
-        } catch (e) {
-            report_error(e)
-        }
- */

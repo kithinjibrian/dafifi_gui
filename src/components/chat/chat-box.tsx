@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import { Switch } from "@/components/ui/switch"
 import { Label } from "../ui/label";
-import { time } from "@/utils/time";
 
 export const ChatBox = ({ sendMessage }) => {
     const [newMessage, setNewMessage] = useState("");
@@ -16,8 +15,7 @@ export const ChatBox = ({ sendMessage }) => {
 
         const result = sendMessage({
             message: `p{ ${json} }`,
-            sender: "user",
-            time: time()
+            sender: "user"
         });
 
 
@@ -27,13 +25,6 @@ export const ChatBox = ({ sendMessage }) => {
         if (textareaRef.current) {
             textareaRef.current.style.height = "40px";
         }
-
-        // Simulate received message after a short delay
-        setTimeout(() => {
-            const replyTime = new Date();
-            const replyTimeStr = replyTime.getHours().toString().padStart(2, '0') + ":" +
-                replyTime.getMinutes().toString().padStart(2, '0');
-        }, 1500);
     };
 
     const handleTextareaChange = (e) => {

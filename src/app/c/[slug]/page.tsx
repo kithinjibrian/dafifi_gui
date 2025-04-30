@@ -15,7 +15,6 @@ import { MobileHeader } from "@/components/mobile/header";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileArtifact } from "@/components/mobile/artifact";
 import { builtin } from "@kithinji/tlugha-browser";
-import { time } from "@/utils/time";
 
 
 const panels: PanelProps[] = [
@@ -66,7 +65,6 @@ export default function Chat() {
                 let json = JSON.stringify(args[0]);
                 await sendMessageWrap({
                     message: `p{ ${json} }`,
-                    time: time(),
                     sender: "user",
                 })
             }

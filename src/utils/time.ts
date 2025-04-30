@@ -1,5 +1,7 @@
-export const time = () => {
-    const now = new Date();
-    return now.getHours().toString().padStart(2, '0') + ":" +
-        now.getMinutes().toString().padStart(2, '0');
-}
+import { DateTime } from 'luxon';
+
+export const time = (utcTime: string, timezone: string = 'UTC'): string => {
+    const utcDate = DateTime.fromISO(utcTime, { zone: 'utc' });
+    const localTime = utcDate.setZone(timezone);
+    return localTime.toFormat('HH:mm');
+};
