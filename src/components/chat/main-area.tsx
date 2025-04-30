@@ -2,7 +2,6 @@ import { useChatsStore } from "@/store/chats";
 import { MessageList } from "./message";
 import { useCallback, useEffect, useRef } from "react";
 import { ChatBox } from "./chat-box";
-import { Message } from "@/store/message";
 import { useParams, useRouter } from "next/navigation";
 
 
@@ -42,8 +41,10 @@ export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }
                     messagesEndRef={messagesEndRef}
                 />
             )}
-            <div className="fixed bottom-0 md:relative w-full flex p-1 shadow-lg items-center bg-background">
+            <div className="fixed bottom-0 md:relative w-full flex flex-col p-1 shadow-lg items-center bg-background">
                 <ChatBox sendMessage={sendMessageWrap} />
+                <div className="flex m-2">
+                </div>
             </div>
         </div>
     );

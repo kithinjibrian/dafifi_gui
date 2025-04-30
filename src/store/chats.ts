@@ -118,11 +118,16 @@ const createChatSlice: StateCreator<
         if (!active) return;
 
         const handleHeader = async (data: any) => {
-            get().pushMessage({ ...msg, id: data.umessage_id });
+            get().pushMessage({
+                ...msg,
+                id: data.umessage_id,
+                createdAt: data.ucreated_at
+            });
             get().pushMessage({
                 id: data.imessage_id,
                 sender: "assistant",
                 message: "",
+                createdAt: data.icreated_at
             });
         };
 

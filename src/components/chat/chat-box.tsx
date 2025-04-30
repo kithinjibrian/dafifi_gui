@@ -37,10 +37,10 @@ export const ChatBox = ({ sendMessage }) => {
             const scrollHeight = textarea.scrollHeight;
 
             // Limit max height to 120px, after which scrolling begins
-            if (scrollHeight <= 300) {
+            if (scrollHeight <= 150) {
                 textarea.style.height = scrollHeight + "px";
             } else {
-                textarea.style.height = "300px";
+                textarea.style.height = "150px";
             }
         }
     };

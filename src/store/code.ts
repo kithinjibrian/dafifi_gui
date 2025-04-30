@@ -50,7 +50,8 @@ export const useCodeStore = create<CodeStore>((set, get) => ({
                         pushMessage({
                             id: header.imessage_id,
                             sender: "assistant",
-                            message: ""
+                            message: "",
+                            createdAt: header.icreated_at
                         });
                     },
                     () => { }
