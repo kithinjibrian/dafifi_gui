@@ -82,7 +82,7 @@ export const ChatBox = ({ sendMessage }) => {
             </div>
 
             {/* Bottom Row: Toggle */}
-            <div className="flex justify-start p-2 gap-2">
+            {/* <div className="flex justify-start p-2 gap-2">
                 <div className="flex items-center space-x-2">
                     <Switch
                         checked={run}
@@ -92,7 +92,7 @@ export const ChatBox = ({ sendMessage }) => {
                         run ? "Run manually" : "Run automatically"
                     }</Label>
                 </div>
-            </div>
+            </div> */}
         </div>
     );
 }

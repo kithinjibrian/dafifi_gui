@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
     ASTNode,
     AttributeListNode,
@@ -51,8 +51,13 @@ export class ReactRender implements LmlASTVisitor {
         public message: Message,
         public chat_id: string = "",
         public save: boolean = false,
-        public state: Record<string, any> = {}
-    ) { }
+        public state: Record<string, any> = {
+            mobile: [false, () => { }],
+            hideCode: [false, () => { }]
+        }
+    ) {
+        console.log(this.message, this.chat_id, this.save, this.state)
+    }
 
     public extension(p: Extension<any>) {
         this.extensions.push(p);
