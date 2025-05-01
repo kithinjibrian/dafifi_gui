@@ -118,6 +118,21 @@ export class ReactRender implements LmlASTVisitor {
         return arr;
     }
 
+    async visitReason(
+        node: SinkholeNode,
+        args?: Record<string, any>
+    ) {
+        return (
+            <div
+                key={this.get_key("reason")}
+                className="my-2 border-l-10 rounded-r-3xl border-sky-500 bg-background">
+                <div className="p-4">
+                    {await this.visit(node.body, args)}
+                </div>
+            </div>
+        )
+    }
+
     async visitAnswer(
         node: SinkholeNode,
         args?: Record<string, any>
@@ -504,6 +519,8 @@ export class ReactRender implements LmlASTVisitor {
         switch (node.name) {
             case "answer":
                 return await this.visitAnswer(node, args);
+            case "reason":
+                return await this.visitReason(node, args);
         }
         return;
     }
