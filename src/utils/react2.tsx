@@ -42,6 +42,7 @@ import { open_artifact } from "@/components/utils/artifacts";
 export class ReactRender implements LmlASTVisitor {
     private extensions: Extension<any>[] = [];
     private key: number = 0;
+    private no_code = 0;
 
     private get_key(name: string) {
         return `${name}-${this.key++}`
@@ -55,9 +56,7 @@ export class ReactRender implements LmlASTVisitor {
             mobile: [false, () => { }],
             hideCode: [false, () => { }]
         }
-    ) {
-        console.log(this.message, this.chat_id, this.save, this.state)
-    }
+    ) {}
 
     public extension(p: Extension<any>) {
         this.extensions.push(p);
@@ -125,7 +124,7 @@ export class ReactRender implements LmlASTVisitor {
         return (
             <div
                 key={this.get_key("reason")}
-                className="my-2 border-l-10 rounded-r-3xl border-sky-500 bg-background">
+                className="my-2 border-l-10 rounded-r-3xl border-sky-700 text-gray-500 bg-background">
                 <div className="p-4">
                     {await this.visit(node.body, args)}
                 </div>
@@ -409,6 +408,10 @@ export class ReactRender implements LmlASTVisitor {
         node: CodeNode,
         args?: Record<string, any>
     ) {
+        this.no_code++;
+
+        const n = this.no_code - 1;
+
         const [hideCode, setHideCode] = this.state.hideCode;
 
         const mobile = this.state.mobile[0];
@@ -434,7 +437,7 @@ export class ReactRender implements LmlASTVisitor {
                             variant={"ghost"}
                             className="text-white p-1 rounded"
                             onClick={() => {
-                                setHideCode()
+                                setHideCode(n)
                             }}
                         >
                             <ChevronDown />
@@ -475,7 +478,7 @@ export class ReactRender implements LmlASTVisitor {
                         </Button>
                     </div>
                 </div>
-                {hideCode && (
+                {hideCode[n] && (
                     <SyntaxHighlighter
                         language={"rust"}
                         style={materialDark}

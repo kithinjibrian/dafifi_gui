@@ -9,15 +9,18 @@ import { time } from "@/utils/time";
 function reducer(state, action) {
     switch (action.type) {
         case 'hideCode':
-            return { ...state, hideCode: !state.hideCode };
+            const updatedHideCode = [...state.hideCode];
+            updatedHideCode[action.index] = !updatedHideCode[action.index];
+            return { ...state, hideCode: updatedHideCode };
         default:
             return state;
     }
 }
 
 export const Message = ({ message, isGrouped }: { message: MessageTYpe }) => {
+    const isMobile = useIsMobile();
     const [react, setReact] = useState([]);
-    const [store, dispatch] = useReducer(reducer, { hideCode: false, is_mobile: useIsMobile() });
+    const [store, dispatch] = useReducer(reducer, { hideCode: []});
 
     useEffect(() => {
         let a = async () => {
@@ -26,14 +29,14 @@ export const Message = ({ message, isGrouped }: { message: MessageTYpe }) => {
                 "",
                 false,
                 {
-                    mobile: [store.is_mobile, () => { }],
-                    hideCode: [store.hideCode, () => dispatch({ type: 'hideCode' })]
+                    mobile: [isMobile, () => { }],
+                    hideCode: [store.hideCode, (index) => dispatch({ type: 'hideCode', index })]
                 }
             ).run();
             setReact(react);
         }
         a();
-    }, [message, store, dispatch]);
+    }, [message, isMobile, store]);
 
 
     return (

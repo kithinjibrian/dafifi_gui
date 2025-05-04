@@ -11,7 +11,13 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 
 import { useEffect, useState } from "react";
-import { MoreVertical, SquareMousePointer, Star, Trash } from "lucide-react";
+import { 
+    ChevronDown, 
+    ChevronUp, 
+    MoreVertical, 
+    SquareMousePointer, 
+    Star, Trash, Pause,
+    Play } from "lucide-react";
 
 import { useChatsStore } from "@/store/chats";
 import Link from 'next/link';
@@ -23,7 +29,7 @@ import { Message } from '@/store/message';
 export const Chats = () => {
     const router = useRouter()
 
-    const { chats, setChats, deleteChats, starChats } = useChatsStore();
+    const { chats, setChats, deleteChats, starChats, updateTask } = useChatsStore();
     const [activeChat, setActiveChat] = useState<number | null>(null);
     const [openMenu, setOpenMenu] = useState<number | null>(null);
     const [selectMode, setSelectMode] = useState<boolean>(false);
@@ -95,6 +101,7 @@ export const Chats = () => {
                                 setChats={setChats}
                                 deleteChats={_deleteChats}
                                 starChats={starChats}
+                                updateTask={updateTask}
                             />
                         ))}
                     </>
@@ -117,6 +124,7 @@ export const Chats = () => {
                                 setChats={setChats}
                                 deleteChats={_deleteChats}
                                 starChats={starChats}
+                                updateTask={updateTask}
                             />
                         ))}
                     </>
@@ -137,9 +145,10 @@ const ChatItem = ({
     selectMode,
     setSelectMode,
     deleteChats,
-    starChats
+    starChats,
+    updateTask
 }: any) => {
-
+    const [task, setTask] = useState(false);
     // 🟡 Toggle Star
     const toggleStar = () => {
         starChats(chat.id, !chat.starred)
@@ -174,64 +183,105 @@ const ChatItem = ({
     return (
         <div
             onClick={() => setActiveChat(chat.id)}
-            className={`relative group w-full flex items-center justify-between p-2 rounded cursor-pointer transition
-                ${activeChat === chat.id ? "bg-sky-500 text-white" : "hover:bg-gray-800"}`}
+            className={`relative group w-full flex flex-col justify-start p-2 rounded cursor-pointer transition`}
         >
-            <div className="flex items-center space-x-2 w-full">
-                {selectMode && (
-                    <Checkbox
-                        checked={chat.selected}
-                        onCheckedChange={toggleSelected}
-                    />
-                )}
-                <Link href={`/c/${chat.id}`} className="no-underline w-full">
-                    {react}
-                </Link>
-            </div>
+            <div className={`flex flex-row justify-between
+                ${activeChat === chat.id ? "bg-sky-500 text-white" : "hover:bg-gray-800"}`}>
+                <div 
+                className="flex items-center space-x-2 w-full">
+                    <Button
+                    variant="ghost"
+                    onClick={() => setTask(!task)}>
+                        {task ? (
+                            <ChevronUp/> 
+                        ) : (
+                            <ChevronDown/> 
+                        )}
+                    </Button>
+                    {selectMode && (
+                        <Checkbox
+                            checked={chat.selected}
+                            onCheckedChange={toggleSelected}
+                        />
+                    )}
+                    <Link href={`/c/${chat.id}`} className="no-underline w-full">
+                        {react}
+                    </Link>
+                </div>
 
-            {/* More Options Menu */}
-            <DropdownMenu
-                open={openMenu === chat.id}
-                onOpenChange={(isOpen) => {
-                    if (!isOpen) setOpenMenu(null);
-                }}
-            >
-                <DropdownMenuTrigger asChild>
-                    <div
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            setOpenMenu(openMenu === chat.id ? null : chat.id);
-                        }}
-                        className="p-1 rounded hover:bg-gray-700 cursor-pointer transition-opacity opacity-50 group-hover:opacity-100"
-                    >
-                        <MoreVertical size={20} />
-                    </div>
-                </DropdownMenuTrigger>
-
-                <DropdownMenuContent
-                    className="w-40 p-1 rounded-lg"
-                    onClick={(e) => e.stopPropagation()}
+                {/* More Options Menu */}
+                <DropdownMenu
+                    open={openMenu === chat.id}
+                    onOpenChange={(isOpen) => {
+                        if (!isOpen) setOpenMenu(null);
+                    }}
                 >
-                    <DropdownMenuItem onClick={toggleSelected}>
-                        <SquareMousePointer className="mr-2" />
-                        Select
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={toggleStar}>
-                        <Star className="mr-2" />
-                        {chat.starred ? "Unstar" : "Star"}
-                    </DropdownMenuItem>
-                    {/* <DropdownMenuItem onClick={() => alert("Rename Chat")}>
-                        <Pencil className="mr-2" />
-                        Rename
-                    </DropdownMenuItem> */}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-red-500" onClick={deleteChat}>
-                        <Trash className="mr-2" />
-                        Delete
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <div
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                setOpenMenu(openMenu === chat.id ? null : chat.id);
+                            }}
+                            className="flex p-1 rounded hover:bg-gray-700 cursor-pointer transition-opacity opacity-50 group-hover:opacity-100"
+                        >
+                            <MoreVertical size={20} />
+                        </div>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent
+                        className="w-40 p-1 rounded-lg"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <DropdownMenuItem onClick={toggleSelected}>
+                            <SquareMousePointer className="mr-2" />
+                            Select
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={toggleStar}>
+                            <Star className="mr-2" />
+                            {chat.starred ? "Unstar" : "Star"}
+                        </DropdownMenuItem>
+                        {/* <DropdownMenuItem onClick={() => alert("Rename Chat")}>
+                            <Pencil className="mr-2" />
+                            Rename
+                        </DropdownMenuItem> */}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-red-500" onClick={deleteChat}>
+                            <Trash className="mr-2" />
+                            Delete
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+            
+            { task && (
+                <div>
+                    { chat.tasks.map((task, index) => (
+                        <div
+                        key={`task-${index}`}
+                        className="flex justify-between p-2">
+                            <span>{task.nickname}</span>
+                            { task.state == "running" ? (
+                                <Pause 
+                                className="text-red-500" 
+                                size={"20"} 
+                                onClick={async () => {
+                                    await updateTask(task.id, { state: "stopped" })
+                                }}
+                                />
+                            ) : task.state == "stopped" && (
+                                <Play 
+                                className="text-green-500" 
+                                size={"20"}
+                                    onClick={async () => {
+                                    await updateTask(task.id, { state: "running" })
+                                }}/>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+
         </div>
     );
 };

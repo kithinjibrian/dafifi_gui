@@ -2,6 +2,7 @@ import { report_error, request } from "@/utils/request";
 import { create, StateCreator } from "zustand";
 import { Message } from "./message";
 import { createTabSlice, TabStore } from "./tab"
+import { createTaskSlice } from "./task"
 import { ReactRender } from "@/utils/react2";
 
 export interface Chat {
@@ -271,5 +272,6 @@ export const useChatsStore = create<
     ChatStore & TabStore
 >((...a) => ({
     ...createChatSlice(...a),
-    ...createTabSlice(...a)
+    ...createTabSlice(...a),
+    ...createTaskSlice(...a),
 }))
