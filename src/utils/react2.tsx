@@ -83,7 +83,7 @@ export class ReactRender implements LmlASTVisitor {
             const react = await this.visit(ast)
             if (this.save) {
                 const exec = useCodeStore.getState().exec;
-                exec(this.chat_id)
+                exec(this.chat_id, this.message.id!)
             }
             return {
                 react

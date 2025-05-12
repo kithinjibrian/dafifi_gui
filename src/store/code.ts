@@ -12,7 +12,7 @@ interface Code {
 export interface CodeStore {
     entries: Code[],
     push: (snippets: string[]) => void,
-    exec: (chat_id: string) => void,
+    exec: (chat_id: string, message_id: string) => void,
     get: <K extends keyof Code>(q: { key: K, value: any }) => Code[],
     set: (id: string, value: Partial<Code>) => void,
 }
@@ -30,10 +30,10 @@ export const useCodeStore = create<CodeStore>((set, get) => ({
 
         set({ entries: n });
     },
-    exec: (chat_id: string) => {
+    exec: (chat_id: string, message_id: string) => {
         get().entries.map(async entry => {
             try {
-                const response = await request.post("/action", { chat_id, code: entry.code });
+                const response = await request.post("/action", { chat_id, message_id, code: entry.code });
 
                 const pushMessage = useChatsStore.getState().pushMessage;
                 const sendMessage = useChatsStore.getState().sendMessage;
