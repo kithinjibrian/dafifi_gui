@@ -11,13 +11,14 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 
 import { useEffect, useState } from "react";
-import { 
-    ChevronDown, 
-    ChevronUp, 
-    MoreVertical, 
-    SquareMousePointer, 
+import {
+    ChevronDown,
+    ChevronUp,
+    MoreVertical,
+    SquareMousePointer,
     Star, Trash, Pause,
-    Play } from "lucide-react";
+    Play
+} from "lucide-react";
 
 import { useChatsStore } from "@/store/chats";
 import Link from 'next/link';
@@ -29,7 +30,7 @@ import { Message } from '@/store/message';
 export const Chats = () => {
     const router = useRouter()
 
-    const { chats, setChats, deleteChats, starChats, updateTask } = useChatsStore();
+    const { chats, setChats, deleteChats, starChats } = useChatsStore();
     const [activeChat, setActiveChat] = useState<number | null>(null);
     const [openMenu, setOpenMenu] = useState<number | null>(null);
     const [selectMode, setSelectMode] = useState<boolean>(false);
@@ -101,7 +102,6 @@ export const Chats = () => {
                                 setChats={setChats}
                                 deleteChats={_deleteChats}
                                 starChats={starChats}
-                                updateTask={updateTask}
                             />
                         ))}
                     </>
@@ -124,7 +124,6 @@ export const Chats = () => {
                                 setChats={setChats}
                                 deleteChats={_deleteChats}
                                 starChats={starChats}
-                                updateTask={updateTask}
                             />
                         ))}
                     </>
@@ -146,9 +145,7 @@ const ChatItem = ({
     setSelectMode,
     deleteChats,
     starChats,
-    updateTask
 }: any) => {
-    const [task, setTask] = useState(false);
     // 🟡 Toggle Star
     const toggleStar = () => {
         starChats(chat.id, !chat.starred)
@@ -187,17 +184,8 @@ const ChatItem = ({
         >
             <div className={`flex flex-row justify-between
                 ${activeChat === chat.id ? "bg-sky-500 text-white" : "hover:bg-gray-800"}`}>
-                <div 
-                className="flex items-center space-x-2 w-full">
-                    <Button
-                    variant="ghost"
-                    onClick={() => setTask(!task)}>
-                        {task ? (
-                            <ChevronUp/> 
-                        ) : (
-                            <ChevronDown/> 
-                        )}
-                    </Button>
+                <div
+                    className="flex items-center space-x-2 w-full">
                     {selectMode && (
                         <Checkbox
                             checked={chat.selected}
@@ -253,35 +241,6 @@ const ChatItem = ({
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-            
-            { task && (
-                <div>
-                    { chat.tasks.map((task, index) => (
-                        <div
-                        key={`task-${index}`}
-                        className="flex justify-between p-2">
-                            <span>{task.nickname}</span>
-                            { task.state == "running" ? (
-                                <Pause 
-                                className="text-red-500" 
-                                size={"20"} 
-                                onClick={async () => {
-                                    await updateTask(task.id, { state: "stopped" })
-                                }}
-                                />
-                            ) : task.state == "stopped" && (
-                                <Play 
-                                className="text-green-500" 
-                                size={"20"}
-                                    onClick={async () => {
-                                    await updateTask(task.id, { state: "running" })
-                                }}/>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            )}
-
         </div>
     );
 };

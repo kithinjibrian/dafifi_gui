@@ -8,13 +8,13 @@ import { useChatsStore } from "@/store/chats";
 import { useEffect, useState } from "react";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useAuthStore } from "@/store/auth";
-import { Artifact } from "@/components/chat/artifact";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/mobile/sidebar";
 import { MobileHeader } from "@/components/mobile/header";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { MobileArtifact } from "@/components/mobile/artifact";
 import { builtin } from "@kithinji/tlugha-browser";
+import { ExtrasSM } from "@/components/mobile/extras";
+import { ExtrasMD } from "@/components/chat/extras";
 
 
 const panels: PanelProps[] = [
@@ -34,7 +34,7 @@ const panels: PanelProps[] = [
     {
         id: 3,
         collapsible: true,
-        content: Artifact
+        content: ExtrasMD
     }
 ];
 
@@ -87,7 +87,7 @@ export default function Chat() {
                                 </div>
                             )}
                             <MainArea panelRef={null} />
-                            <MobileArtifact />
+                            <ExtrasSM />
                         </div>
                     </SidebarProvider>
                 </>

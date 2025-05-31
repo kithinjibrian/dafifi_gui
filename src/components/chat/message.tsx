@@ -1,10 +1,17 @@
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { ReactRender } from "@/utils/react2";
 import { ScrollArea } from "../ui/scroll-area";
-import { Message as MessageTYpe } from "@/store/message";
 import { useEffect, useReducer, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { time } from "@/utils/time";
+import Link from "next/link";
+import { Copy, Pencil, ThumbsDown, ThumbsUp } from "lucide-react";
+import { Button } from "../ui/button";
+import { ChatBox } from "./chat-box";
+import { useChatsStore } from "@/store/chats";
+import { Message as MessageType } from "@/store/message";
+import { open_extras } from "../utils/extras";
+import { useTextStore } from "@/store/text";
 
 function reducer(state, action) {
     switch (action.type) {
@@ -17,10 +24,22 @@ function reducer(state, action) {
     }
 }
 
-export const Message = ({ message, isGrouped }: { message: MessageTYpe }) => {
+export const Message = ({ message, isGrouped }: { message: MessageType; isGrouped: boolean }) => {
     const isMobile = useIsMobile();
-    const [react, setReact] = useState([]);
-    const [store, dispatch] = useReducer(reducer, { hideCode: []});
+    const [isHovered, setIsHovered] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [renderedComponents, setRenderedComponents] = useState([]);
+    const [store, dispatch] = useReducer(reducer, { hideCode: [] });
+    const { write } = useTextStore();
+
+    const {
+        active,
+        fetchChat,
+        sendMessageWrap,
+        patchMessage
+    } = useChatsStore();
+
+    if (!active) return <></>
 
     useEffect(() => {
         let a = async () => {
@@ -33,28 +52,119 @@ export const Message = ({ message, isGrouped }: { message: MessageTYpe }) => {
                     hideCode: [store.hideCode, (index) => dispatch({ type: 'hideCode', index })]
                 }
             ).run();
-            setReact(react);
-        }
+            setRenderedComponents(react);
+        };
         a();
-    }, [message, isMobile, store]);
-
+    }, [message, isMobile, store.hideCode]);
 
     return (
-        <>
-            <div
-                className={`${isGrouped ? 'mt-1' : ''} ${message.sender === "user"
-                    ? "bg-sky-700 text-foreground"
-                    : "bg-card text-foreground"
-                    } rounded-3xl py-4 px-4 relative min-w-40`}
-            >
-                {react}
-                <div className="text-xs text-gray-300 text-right mt-1">
-                    {time(message.createdAt)}
+        <div
+            id={message.id}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+
+            <Link href={`#${message.id}`} scroll={false}></Link>
+
+            {isEditing ? (
+                <div>
+                    <ChatBox
+                        initMessage={message.message}
+                        sendMessage={async (msg: MessageType) => {
+
+                            await patchMessage({
+                                id: message.id,
+                            });
+
+                            await fetchChat(active.id, () => { });
+
+                            await sendMessageWrap({
+                                sender: "user",
+                                message: msg.message
+                            });
+
+                            setIsEditing(false)
+                        }}
+                        handleCancel={() => setIsEditing(false)}>
+                    </ChatBox>
                 </div>
-            </div>
-        </>
+            ) : (
+                <div
+                    className={`${isGrouped ? 'mt-1' : ''} ${message.sender === 'user'
+                        ? 'bg-sky-700 text-foreground'
+                        : 'bg-card text-foreground'
+                        } rounded-3xl py-4 px-4 relative min-w-40`}>
+                    {renderedComponents}
+                    <div className="text-xs text-gray-300 text-right mt-1">
+                        {time(message.createdAt)}
+                    </div>
+                </div>
+            )}
+
+
+            {message.sender === "user" && (
+                <div className="flex justify-end">
+                    {(isHovered && !isEditing) ? (
+                        <>
+                            <Button
+                                variant={"ghost"}
+                                onClick={() => {
+
+                                }}>
+                                <Copy />
+                            </Button>
+                            <Button
+                                variant={"ghost"}
+                                onClick={() => setIsEditing(true)}>
+                                <Pencil />
+                            </Button>
+                        </>
+                    ) : (
+                        <Button variant={"ghost"}></Button>
+                    )}
+                </div>
+            )}
+
+            {message.sender === "assistant" && (
+                <div className="flex justify-start">
+                    <Button
+                        variant={"ghost"}
+                        onClick={() => {
+
+                        }}>
+                        <Copy />
+                    </Button>
+                    <Button
+                        variant={"ghost"}
+                        onClick={() => {
+                            write(message);
+
+                            open_extras(isMobile, {
+                                menu: "Code",
+                            })
+                        }}>
+                        <Pencil />
+                    </Button>
+                    <Button
+                        variant={"ghost"}
+                        onClick={() => {
+
+                        }}>
+                        <ThumbsUp />
+                    </Button>
+                    <Button
+                        variant={"ghost"}
+                        onClick={() => {
+
+                        }}>
+                        <ThumbsDown />
+                    </Button>
+                </div>
+            )}
+        </div>
     );
 };
+
 
 export const MessageGroup = ({ group }) => {
 

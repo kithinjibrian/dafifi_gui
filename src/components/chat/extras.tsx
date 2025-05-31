@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, RefObject } from 'react';
 import { Button } from '../ui/button';
-import { useArtifactStore } from '@/store/artifact';
-import { artifacts, PanelRef, set_panel } from '../utils/artifacts';
+import { Extras, PanelRef, set_panel } from '../utils/extras';
+import { X } from 'lucide-react';
+import { useExtrasStore } from '@/store/extras';
 
-export const Artifact = ({ panelRef }: { panelRef: RefObject<PanelRef | null> }) => {
-    const { artifact, save, close } = useArtifactStore();
+export const ExtrasMD = ({ panelRef }: { panelRef: RefObject<PanelRef | null> }) => {
+    const { save, close } = useExtrasStore();
     const [content, setContent] = useState('');
 
     useEffect(() => {
@@ -34,19 +35,15 @@ export const Artifact = ({ panelRef }: { panelRef: RefObject<PanelRef | null> })
 
     return (
         <div className="h-full w-full">
-            <div className="flex gap-2 justify-end p-2">
-                <Button className="rounded-full" onClick={handleSave}>
-                    Save
-                </Button>
-                <Button className="rounded-full" variant="outline" onClick={handleCancel}>
-                    Cancel
+            <div className="flex gap-2 justify-end p-2 border-b">
+                <Button className="rounded-full" variant="ghost" onClick={handleCancel}>
+                    <X />
                 </Button>
             </div>
             <div className="h-[calc(100%-48px)]">
-                {artifact in artifacts
-                    ? artifacts[artifact]({})
-                    : <div className="p-4 text-center text-muted-foreground">Unknown artifact type</div>}
+                <Extras />
             </div>
         </div>
     );
 };
+

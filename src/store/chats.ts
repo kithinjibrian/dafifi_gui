@@ -2,8 +2,9 @@ import { report_error, request } from "@/utils/request";
 import { create, StateCreator } from "zustand";
 import { Message } from "./message";
 import { createTabSlice, TabStore } from "./tab"
-import { createTaskSlice } from "./task"
+import { createTaskSlice, TaskStore } from "./task"
 import { ReactRender } from "@/utils/react2";
+import { ArrayStore, createArraySlice } from "./array";
 
 export interface Chat {
     id: string;
@@ -11,6 +12,7 @@ export interface Chat {
     messages: Message[];
     starred: boolean;
     selected: boolean;
+    tasks: any[];
 }
 
 export interface ChatStore {
@@ -26,8 +28,10 @@ export interface ChatStore {
     pushMessage: (message: Message) => void;
     updateMessage: (message_id: string, data: any) => void;
     appendMessage: (message_id: string, message: string) => void;
-    sendMessage: (msg: Message, res: (data: string) => void, end: (data: any) => void) => void;
-    sendMessageWrap: (msg: Message) => void;
+    sendMessage: (msg: Record<string, string>, res: (data: string) => void, end: (data: any) => void) => void;
+    sendMessageWrap: (msg: Partial<Message>) => void;
+    starChats: (id: string, star: boolean) => void;
+    patchMessage: (msg: Partial<Message>) => void;
 }
 
 const createChatSlice: StateCreator<
@@ -53,7 +57,16 @@ const createChatSlice: StateCreator<
             }),
         }));
     },
-    sendMessage: async (msg: Message, res: (data: any) => void, end: (data: any) => void) => {
+    patchMessage: async (msg: Partial<Message>) => {
+        try {
+            const response = await request.patch(`chat/${get().active.id}`, msg);
+
+            console.log(response.data);
+        } catch (e) {
+            report_error(e)
+        }
+    },
+    sendMessage: async (msg: Record<string, string>, res: (data: any) => void, end: (data: any) => void) => {
         const params = new URLSearchParams(msg);
 
         const response = await fetch(`https://api.dafifi.net/chat/prompt?${params.toString()}`, {
@@ -113,7 +126,7 @@ const createChatSlice: StateCreator<
             }
         }
     },
-    sendMessageWrap: async (msg: Message) => {
+    sendMessageWrap: async (msg: Partial<Message>) => {
         let active = get().active;
 
         if (!active) return;
@@ -208,6 +221,10 @@ const createChatSlice: StateCreator<
         try {
             const response = await request.get(`chat`);
             set({ chats: response.data })
+
+            if (get().active) {
+                await get().fetchChat(get().active.id, () => { })
+            }
         } catch (e) {
             report_error(e)
         }
@@ -269,9 +286,10 @@ const createChatSlice: StateCreator<
 })
 
 export const useChatsStore = create<
-    ChatStore & TabStore
+    ChatStore & TabStore & TaskStore & ArrayStore
 >((...a) => ({
     ...createChatSlice(...a),
     ...createTabSlice(...a),
     ...createTaskSlice(...a),
+    ...createArraySlice(...a)
 }))

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TooltipComponent } from "../utils/tooltip";
-import { MessageCircle, Plus } from "lucide-react";
+import { Lock, MessageCircle, Plus, Share2 } from "lucide-react";
 import { NewChat } from "./new-chat";
 import { Chats } from "./chats";
 import { useChatsStore } from "@/store/chats";
@@ -10,6 +10,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 const navItems = [
     { value: 'New Chat', icon: Plus, content: NewChat },
     { value: 'Chats', icon: MessageCircle, content: Chats },
+    { value: 'Secrets', icon: Lock, content: () => null },
+    { value: 'Knowledge Graph', icon: Share2, content: () => null },
 ]
 
 export const NavBar = ({ panelRef }: { panelRef: React.RefObject<any> | null }) => {
@@ -64,7 +66,7 @@ export const NavBar = ({ panelRef }: { panelRef: React.RefObject<any> | null }) 
                 onValueChange={setActiveTab}
                 className="flex flex-row gap-0 h-[calc(100vh-40px)] w-full">
                 <div className="h-full border-x w-16">
-                    <TabsList className="m-0 p-0 flex flex-col items-start h-30 w-full">
+                    <TabsList className="m-0 p-0 flex flex-col items-start h-64 w-full">
                         {renderNavItems()}
                     </TabsList>
                 </div>

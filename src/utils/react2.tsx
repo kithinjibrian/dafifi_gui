@@ -23,6 +23,7 @@ import {
     NumberNode,
     OlNode,
     ParagraphNode,
+    PreNode,
     SinkholeNode,
     StringNode
 } from "@kithinji/lml";
@@ -37,14 +38,14 @@ import { materialDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { useCodeStore } from "@/store/code";
 import { Message } from "@/store/message";
 import { useTextStore } from "@/store/text";
-import { open_artifact } from "@/components/utils/artifacts";
+import { open_extras } from "@/components/utils/extras";
 
 export class ReactRender implements LmlASTVisitor {
     private extensions: Extension<any>[] = [];
     private key: number = 0;
     private no_code = 0;
 
-    private get_key(name: string) {
+    public get_key(name: string) {
         return `${name}-${this.key++}`
     }
 
@@ -56,7 +57,7 @@ export class ReactRender implements LmlASTVisitor {
             mobile: [false, () => { }],
             hideCode: [false, () => { }]
         }
-    ) {}
+    ) { }
 
     public extension(p: Extension<any>) {
         this.extensions.push(p);
@@ -80,6 +81,7 @@ export class ReactRender implements LmlASTVisitor {
     public async run() {
         try {
             const ast = await lml(this.message.message);
+
             const react = await this.visit(ast)
             if (this.save) {
                 const exec = useCodeStore.getState().exec;
@@ -244,7 +246,20 @@ export class ReactRender implements LmlASTVisitor {
                 key={this.get_key("p")}
                 className="mb-3" >
                 {await this.visit(node.body, args)}
-            </p >
+            </p>
+        )
+    }
+
+    async visitPre(
+        node: PreNode,
+        args?: Record<string, any>
+    ) {
+        return (
+            <pre
+                key={this.get_key("pre")}
+                className="mb-3" >
+                {await this.visit(node.body, args)}
+            </pre>
         )
     }
 
@@ -467,8 +482,8 @@ export class ReactRender implements LmlASTVisitor {
                             onClick={() => {
                                 const write = useTextStore.getState().write;
                                 write(code[0]);
-                                open_artifact(mobile, {
-                                    artifact: "coder",
+                                open_extras(mobile, {
+                                    menu: "Editor",
                                     async save() {
                                     }
                                 })
@@ -533,5 +548,49 @@ export class ReactRender implements LmlASTVisitor {
             code: code,
             std: "https://chat.dafifi.net"
         });
+    }
+}
+
+export class ReactED extends ReactRender {
+    constructor(
+        message: Message,
+    ) {
+        super(
+            message
+        );
+    }
+
+    async visitCode(
+        node: CodeNode,
+        args?: Record<string, any>
+    ) {
+        const attr = await this.visit(node.attributes);
+
+        const code = await this.visit(node.body, args);
+
+        return (
+            <div
+                key={this.get_key("code")}
+                className="w-full max-w-[70vw] border rounded-md m-2 p-0 min-w-40"
+            >
+                <div className="bg-card border-b p-2 flex justify-between items-center">
+                    <div className="flex flex-row items-center">
+                        <span>{attr.lang}</span>
+                    </div>
+                </div>
+                <SyntaxHighlighter
+                    language={"rust"}
+                    style={materialDark}
+                    customStyle={{
+                        margin: 0,
+                        padding: "1rem",
+                        minWidth: "100%",
+                        boxSizing: "border-box"
+                    }}
+                >
+                    {code}
+                </SyntaxHighlighter>
+            </div >
+        )
     }
 }

@@ -3,9 +3,14 @@ import { MessageList } from "./message";
 import { useCallback, useEffect, useRef } from "react";
 import { ChatBox } from "./chat-box";
 import { useParams, useRouter } from "next/navigation";
+import { Menu } from "lucide-react";
+import { open_extras } from "../utils/extras";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "../ui/button";
 
 
 export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }) => {
+    const isMobile = useIsMobile();
     const router = useRouter();
     const params = useParams<{ slug: string }>();
 
@@ -14,6 +19,16 @@ export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }
         fetchChat,
         sendMessageWrap
     } = useChatsStore();
+
+    useEffect(() => {
+        const hash = window.location.hash;
+        if (hash) {
+            const el = document.getElementById(hash.substring(1)); // remove "#"
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth" });
+            }
+        }
+    }, []);
 
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -34,7 +49,19 @@ export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }
     }, [params.slug, active, fetchChat, router]);
 
     return (
-        <div className="relative flex flex-col h-[95%] md:h-full w-full pt-10 md:pt-5">
+        <div className="relative flex flex-col h-[95%] md:h-full w-full pt-10 md:pt-2">
+            <div className="flex justify-end">
+                <Button
+                    variant="ghost"
+                    onClick={() => {
+                        open_extras(isMobile, {
+                            menu: "Editor",
+                            save: () => { },
+                        })
+                    }}>
+                    <Menu />
+                </Button>
+            </div>
             {active && (
                 <MessageList
                     messages={active.messages}

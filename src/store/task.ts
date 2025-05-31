@@ -2,6 +2,7 @@ import { StateCreator } from "zustand";
 import { report_error, request } from "@/utils/request";
 
 export interface TaskStore {
+    updateTask: (chat_id: string, data: any) => Promise<void>
 }
 
 export const createTaskSlice: StateCreator<
@@ -14,7 +15,7 @@ export const createTaskSlice: StateCreator<
         try {
             const response = await request.patch(`/task/${chat_id}`, data);
             get().fetchChats();
-        } catch(e) {
+        } catch (e) {
             report_error(e)
         }
     }
