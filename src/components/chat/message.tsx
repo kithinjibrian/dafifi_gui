@@ -19,6 +19,22 @@ function reducer(state, action) {
             const updatedHideCode = [...state.hideCode];
             updatedHideCode[action.index] = !updatedHideCode[action.index];
             return { ...state, hideCode: updatedHideCode };
+        case 'Loading': {
+            const updatedLoading = state.loading.map(row => row ? [...row] : []);
+
+            if (!updatedLoading[action.x]) {
+                updatedLoading[action.x] = [];
+            }
+
+            if (updatedLoading[action.x][action.y] === undefined) {
+                updatedLoading[action.x][action.y] = false;
+            }
+
+            updatedLoading[action.x][action.y] = !updatedLoading[action.x][action.y];
+
+            return { ...state, loading: updatedLoading };
+        }
+
         default:
             return state;
     }
@@ -29,14 +45,14 @@ export const Message = ({ message, isGrouped }: { message: MessageType; isGroupe
     const [isHovered, setIsHovered] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [renderedComponents, setRenderedComponents] = useState([]);
-    const [store, dispatch] = useReducer(reducer, { hideCode: [] });
+    const [store, dispatch] = useReducer(reducer, { hideCode: [], loading: [[], []] });
     const { write } = useTextStore();
 
     const {
         active,
         fetchChat,
         sendMessageWrap,
-        patchMessage
+        branchMessage
     } = useChatsStore();
 
     if (!active) return <></>
@@ -45,17 +61,18 @@ export const Message = ({ message, isGrouped }: { message: MessageType; isGroupe
         let a = async () => {
             const { react } = await new ReactRender(
                 message,
-                "",
+                active.id,
                 false,
                 {
                     mobile: [isMobile, () => { }],
-                    hideCode: [store.hideCode, (index) => dispatch({ type: 'hideCode', index })]
+                    hideCode: [store.hideCode, (index: number) => dispatch({ type: 'hideCode', index })],
+                    loading: [store.loading, (x: number, y: number) => dispatch({ type: 'Loading', x, y })]
                 }
             ).run();
             setRenderedComponents(react);
         };
         a();
-    }, [message, isMobile, store.hideCode]);
+    }, [message, isMobile, store]);
 
     return (
         <div
@@ -63,16 +80,13 @@ export const Message = ({ message, isGrouped }: { message: MessageType; isGroupe
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
-
-            <Link href={`#${message.id}`} scroll={false}></Link>
-
             {isEditing ? (
                 <div>
                     <ChatBox
                         initMessage={message.message}
                         sendMessage={async (msg: MessageType) => {
 
-                            await patchMessage({
+                            await branchMessage({
                                 id: message.id,
                             });
 

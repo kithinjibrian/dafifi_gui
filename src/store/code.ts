@@ -30,19 +30,19 @@ export const useCodeStore = create<CodeStore>((set, get) => ({
 
         set({ entries: n });
     },
-    exec: (chat_id: string, message_id: string) => {
-        get().entries.map(async entry => {
+    exec: async (chat_id: string, message_id: string) => {
+        for (const entry of get().entries) {
             try {
                 const response = await request.post("/action", { chat_id, message_id, code: entry.code });
 
                 const pushMessage = useChatsStore.getState().pushMessage;
                 const sendMessage = useChatsStore.getState().sendMessage;
 
-                pushMessage(response.data);
+                pushMessage(response.data.data);
 
                 await sendMessage({
-                    id: response.data.id,
-                    message: response.data.message,
+                    id: response.data.data.id,
+                    message: response.data.data.message,
                     sender: "tool",
                     chat_id
                 },
@@ -60,7 +60,7 @@ export const useCodeStore = create<CodeStore>((set, get) => ({
             } catch (e) {
                 throw e;
             }
-        })
+        }
 
         set({ entries: [] });
     },

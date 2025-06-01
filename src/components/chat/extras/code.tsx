@@ -1,8 +1,14 @@
+import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { PanelRef } from "@/components/utils/extras";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useChatsStore } from "@/store/chats";
 import { useTextStore } from "@/store/text"
+import { HTMLToLML } from "@/utils/html2lml";
 import { ReactED } from "@/utils/react2";
-import { useEffect, useReducer, useState } from "react";
+import { Save } from "lucide-react";
+import { RefObject, use, useEffect, useReducer, useRef, useState } from "react";
+import { renderToString, renderToStaticMarkup } from 'react-dom/server';
 
 function reducer(state, action) {
     switch (action.type) {
@@ -15,37 +21,148 @@ function reducer(state, action) {
     }
 }
 
-export const CodeEd = () => {
-    const isMobile = useIsMobile();
-    const [store, dispatch] = useReducer(reducer, { hideCode: [] });
-    const [renderedComponents, setRenderedComponents] = useState([]);
+export const CodeBtns = ({ panelRef }: { panelRef: RefObject<PanelRef | null> }) => {
     const { text } = useTextStore();
+    const { active, editMessage, refreshChat } = useChatsStore();
 
     if (!text) return <></>
 
-    useEffect(() => {
-        let a = async () => {
-            const { react } = await new ReactED(
-                text,
-            ).run();
-            setRenderedComponents(react);
-        };
-        a();
-    }, [text, isMobile, store.hideCode]);
+    const collapsePanel = () => {
+        if (panelRef?.current) {
+            panelRef.current.collapse();
+        }
+    };
+
+    const handleSave = async () => {
+        await editMessage({
+            id: text.id,
+            message: text.message,
+        });
+
+        await refreshChat();
+
+        collapsePanel();
+    }
 
     return (
-        <div
-            className='h-full w-full p-2'>
+        <>
+            <Button
+                className="rounded-full"
+                variant="ghost"
+                onClick={handleSave}
+            >
+                Save
+                <Save />
+            </Button>
+        </>
+    )
+}
+
+export const CodeEd = () => {
+    const [store, dispatch] = useReducer(reducer, { hideCode: [] });
+    const [renderedComponents, setRenderedComponents] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const { text, write } = useTextStore();
+    const contentRef = useRef(null);
+
+    const converter = new HTMLToLML({
+        preserveWhitespace: false,
+        includeImages: true,
+        includeLinks: true,
+        includeTables: true,
+        codeLanguage: 'javascript'
+    });
+
+    if (!text) return <div className="p-4 text-gray-500">No code to render</div>;
+
+    useEffect(() => {
+        let isCancelled = false;
+
+        const processCode = async () => {
+            if (!text.message.trim()) return;
+
+            setIsLoading(true);
+            setError(null);
+
+            try {
+                const reactEditor = new ReactED(text);
+                const { react } = await reactEditor.run();
+
+                if (!isCancelled) {
+                    setRenderedComponents(react);
+                }
+            } catch (err) {
+                if (!isCancelled) {
+                    setError(err.message || 'Failed to render components');
+                    setRenderedComponents([]);
+                }
+            } finally {
+                if (!isCancelled) {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        processCode();
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [text, store.hideCode]);
+
+    if (isLoading) {
+        return (
+            <div className="h-full w-full p-2 flex items-center justify-center">
+                <div className="text-gray-500">Processing code...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="h-full w-full p-2">
+                <div className="bg-red-50 border border-red-200 rounded p-4 text-red-700">
+                    <strong>Error:</strong> {error}
+                </div>
+            </div>
+        );
+    }
+
+    const getHTML = (): string => {
+        if (contentRef.current) {
+            return contentRef.current.innerHTML;
+        }
+        return '';
+    };
+
+    const getLML = (): string => {
+        const html = getHTML();
+        if (html) {
+            return converter.convert(html);
+        }
+        return '';
+    };
+
+    return (
+        <div className="h-full w-full p-2">
             <ScrollArea className="h-9/10 w-full">
                 <div
+                    ref={contentRef}
                     contentEditable
                     suppressContentEditableWarning={true}
-                    className="outline-none"
+                    className="outline-none min-h-full"
+                    role="textbox"
+                    aria-label="Code editor output"
+                    onInput={(e) => {
+                        text.message = getLML();
+                        write(text);
+                    }}
                 >
                     {renderedComponents}
                 </div>
                 <ScrollBar orientation="horizontal" />
             </ScrollArea>
         </div>
-    )
-}
+    );
+};

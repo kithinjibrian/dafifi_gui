@@ -20,16 +20,6 @@ export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }
         sendMessageWrap
     } = useChatsStore();
 
-    useEffect(() => {
-        const hash = window.location.hash;
-        if (hash) {
-            const el = document.getElementById(hash.substring(1)); // remove "#"
-            if (el) {
-                el.scrollIntoView({ behavior: "smooth" });
-            }
-        }
-    }, []);
-
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
     const scrollToBottom = useCallback(() => {
@@ -41,6 +31,16 @@ export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }
             scrollToBottom();
         }
     }, [active?.messages, scrollToBottom]);
+
+    useEffect(() => {
+        const hash = window.location.hash;
+        if (hash) {
+            const el = document.getElementById(hash.substring(1)); // remove "#"
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth" });
+            }
+        }
+    }, []);
 
     useEffect(() => {
         if (!active || active.id !== params.slug) {

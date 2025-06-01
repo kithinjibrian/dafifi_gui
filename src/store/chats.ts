@@ -21,6 +21,7 @@ export interface ChatStore {
     setChats: (id: string, data: any) => void;
     setActive: (id: string) => void;
     fetchChats: () => void;
+    refreshChat: () => void;
     fetchChat: (id: string, end: (active: Chat) => void) => Promise<any>;
     sendAction: (chat_id: string, code: string) => Promise<Message>;
     deleteChats: (id: string) => Promise<void>;
@@ -31,7 +32,8 @@ export interface ChatStore {
     sendMessage: (msg: Record<string, string>, res: (data: string) => void, end: (data: any) => void) => void;
     sendMessageWrap: (msg: Partial<Message>) => void;
     starChats: (id: string, star: boolean) => void;
-    patchMessage: (msg: Partial<Message>) => void;
+    branchMessage: (msg: Partial<Message>) => void;
+    editMessage: (msg: Partial<Message>) => void;
 }
 
 const createChatSlice: StateCreator<
@@ -57,13 +59,20 @@ const createChatSlice: StateCreator<
             }),
         }));
     },
-    patchMessage: async (msg: Partial<Message>) => {
+    branchMessage: async (msg: Partial<Message>) => {
         try {
-            const response = await request.patch(`chat/${get().active.id}`, msg);
-
-            console.log(response.data);
+            await request.patch(`chat/branch/${get().active.id}`, msg);
         } catch (e) {
             report_error(e)
+            throw e;
+        }
+    },
+    editMessage: async (msg: Partial<Message>) => {
+        try {
+            await request.patch(`chat/update/${get().active.id}`, msg);
+        } catch (e) {
+            report_error(e)
+            throw e;
         }
     },
     sendMessage: async (msg: Record<string, string>, res: (data: any) => void, end: (data: any) => void) => {
@@ -239,6 +248,11 @@ const createChatSlice: StateCreator<
             report_error(e)
             throw e;
         }
+    },
+    refreshChat: async (): Promise<any> => {
+        if (!get().active) return;
+
+        await get().fetchChat(get().active.id, () => { })
     },
     deleteChats: async (id: string) => {
         let chats;

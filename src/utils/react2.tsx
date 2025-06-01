@@ -44,6 +44,7 @@ export class ReactRender implements LmlASTVisitor {
     private extensions: Extension<any>[] = [];
     private key: number = 0;
     private no_code = 0;
+    public ast?: ASTNode;
 
     public get_key(name: string) {
         return `${name}-${this.key++}`
@@ -80,9 +81,9 @@ export class ReactRender implements LmlASTVisitor {
 
     public async run() {
         try {
-            const ast = await lml(this.message.message);
+            this.ast = await lml(this.message.message);
 
-            const react = await this.visit(ast)
+            const react = await this.visit(this.ast);
             if (this.save) {
                 const exec = useCodeStore.getState().exec;
                 exec(this.chat_id, this.message.id!)
@@ -100,7 +101,8 @@ export class ReactRender implements LmlASTVisitor {
         args?: Record<string, any>
     ) {
         return (
-            <div>
+            <div
+                data-lml="doc">
                 {await this.visit(node.document, args)}
             </div>
         );
@@ -123,8 +125,10 @@ export class ReactRender implements LmlASTVisitor {
         node: SinkholeNode,
         args?: Record<string, any>
     ) {
+
         return (
             <div
+                data-lml="reason"
                 key={this.get_key("reason")}
                 className="my-2 border-l-10 rounded-r-3xl border-sky-700 text-gray-500 bg-background">
                 <div className="p-4">
@@ -140,6 +144,7 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <div
+                data-lml="answer"
                 key={this.get_key("answer")}>
                 {await this.visit(node.body, args)}
             </div>
@@ -165,6 +170,7 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <h1
+                data-lml="h1"
                 key={this.get_key("h1")}
                 className="mb-2 text-4xl">
                 {await this.visit(node.body, args)}
@@ -178,6 +184,7 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <h2
+                data-lml="h2"
                 key={this.get_key("h2")}
                 className="mb-2 text-3xl">
                 {await this.visit(node.body, args)}
@@ -191,6 +198,7 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <h3
+                data-lml="h3"
                 key={this.get_key("h3")}
                 className="mb-2 text-2xl">
                 {await this.visit(node.body, args)}
@@ -204,6 +212,7 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <h4
+                data-lml="h4"
                 key={this.get_key("h4")}
                 className="mb-2 text-xl">
                 {await this.visit(node.body, args)}
@@ -217,6 +226,7 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <h5
+                data-lml="h5"
                 key={this.get_key("h5")}
                 className="mb-2 text-lg">
                 {await this.visit(node.body, args)}
@@ -230,6 +240,7 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <h6
+                data-lml="h6"
                 key={this.get_key("h6")}
                 className="mb-2 text-base">
                 {await this.visit(node.body, args)}
@@ -243,6 +254,7 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <p
+                data-lml="p"
                 key={this.get_key("p")}
                 className="mb-3" >
                 {await this.visit(node.body, args)}
@@ -256,6 +268,7 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <pre
+                data-lml="pre"
                 key={this.get_key("pre")}
                 className="mb-3" >
                 {await this.visit(node.body, args)}
@@ -269,8 +282,9 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <ol
+                data-lml="ol"
                 key={this.get_key("ol")}
-                className="list-decimal list-inside"
+                className="list-decimal list-inside mb-3"
             >
                 {await this.visit(node.body, args)}
             </ol>
@@ -283,8 +297,9 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <ul
+                data-lml="ul"
                 key={this.get_key("ul")}
-                className="list-disc list-inside"
+                className="list-disc list-inside mb-3 pl-5 space-y-2"
             >
                 {await this.visit(node.body, args)}
             </ul>
@@ -297,6 +312,7 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <li
+                data-lml="li"
                 key={this.get_key("li")} >
                 {await this.visit(node.body, args)}
             </li>
@@ -306,7 +322,9 @@ export class ReactRender implements LmlASTVisitor {
     async visitB(node: BNode, args?: Record<string, any>) {
         const body = await this.visit(node.body, args);
         return (
-            <strong key={this.get_key("strong")}>
+            <strong
+                data-lml="b"
+                key={this.get_key("strong")}>
                 {body}
             </strong>
         );
@@ -319,6 +337,7 @@ export class ReactRender implements LmlASTVisitor {
         const body = await this.visit(node.body, args);
         return (
             <em
+                data-lml="i"
                 key={this.get_key("em")} >
                 {body}
             </em>
@@ -329,8 +348,9 @@ export class ReactRender implements LmlASTVisitor {
         const body = await this.visit(node.body, args);
         return (
             <code
+                data-lml="c"
                 className="px-1 rounded border font-mono text-sm"
-                key={this.get_key("em")}
+                key={this.get_key("c")}
             >
                 {body}
             </code>
@@ -345,6 +365,7 @@ export class ReactRender implements LmlASTVisitor {
 
         return (
             <Button
+                data-lml="button"
                 key={this.get_key("button")}
                 variant={"outline"}
                 className="rounded-full"
@@ -369,6 +390,7 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <Input
+                data-lml="input"
                 key={await this.get_key("input")} />
         )
     }
@@ -380,6 +402,7 @@ export class ReactRender implements LmlASTVisitor {
         const attr = await this.visit(node.attributes);
         return (
             <a
+                data-lml="link"
                 target="_blank"
                 href={attr.href}
                 key={this.get_key("a")}
@@ -395,8 +418,9 @@ export class ReactRender implements LmlASTVisitor {
     ) {
         return (
             <img
+                data-lml="img"
                 src=""
-                key={this.get_key("a")}>
+                key={this.get_key("img")}>
             </img>
         )
     }
@@ -423,11 +447,13 @@ export class ReactRender implements LmlASTVisitor {
         node: CodeNode,
         args?: Record<string, any>
     ) {
+        const self = this;
         this.no_code++;
 
         const n = this.no_code - 1;
 
         const [hideCode, setHideCode] = this.state.hideCode;
+        const [loading, setLoading] = this.state.loading;
 
         const mobile = this.state.mobile[0];
         const attr = await this.visit(node.attributes);
@@ -443,6 +469,7 @@ export class ReactRender implements LmlASTVisitor {
 
         return (
             <div
+                data-lml="code"
                 key={this.get_key("code")}
                 className="w-full max-w-[70vw] border rounded-md m-2 p-0 min-w-40"
             >
@@ -460,28 +487,62 @@ export class ReactRender implements LmlASTVisitor {
                         <span>{attr.lang}</span>
                     </div>
                     <div className="flex space-x-1">
-                        {attr.run && (
+                        {attr.lang === "lugha" && (
                             <Button
                                 variant={"ghost"}
                                 className="text-white p-1 rounded"
-                                onClick={() => { /* Implement copy functionality here */ }}
+                                onClick={async () => {
+                                    setLoading(0, n);
+
+                                    const { push, exec } = useCodeStore.getState();
+
+                                    push(code);
+
+                                    await exec(self.chat_id, self.message.id!);
+                                    setLoading(0, n);
+                                }}
                             >
-                                <Play />
+                                {loading[0] && loading[0][n] ? (
+                                    <>running...</>
+                                ) : (
+                                    <Play />
+                                )}
                             </Button>
                         )}
                         <Button
                             variant={"ghost"}
                             className="text-white p-1 rounded"
-                            onClick={() => { /* Implement copy functionality here */ }}
+                            onClick={() => {
+                                setLoading(1, n);
+
+                                setTimeout(() => {
+                                    setLoading(1, n);
+                                }, 500);
+
+                                navigator.clipboard.writeText(code[0])
+                            }}
                         >
-                            <Copy />
+                            {loading[1] && loading[1][n] ? (
+                                <>copied...</>
+                            ) : (
+                                <Copy />
+                            )}
                         </Button>
                         <Button
                             variant={"ghost"}
                             className="text-white p-1 rounded"
                             onClick={() => {
                                 const write = useTextStore.getState().write;
-                                write(code[0]);
+
+                                write({
+                                    ...this.message,
+                                    chat_id: self.chat_id,
+                                    message: code[0],
+                                    ast: self.ast,
+                                    node: node,
+                                    runnable: attr.lang === "lugha"
+                                });
+
                                 open_extras(mobile, {
                                     menu: "Editor",
                                     async save() {
@@ -493,20 +554,22 @@ export class ReactRender implements LmlASTVisitor {
                         </Button>
                     </div>
                 </div>
-                {hideCode[n] && (
-                    <SyntaxHighlighter
-                        language={"rust"}
-                        style={materialDark}
-                        customStyle={{
-                            margin: 0,
-                            padding: "1rem",
-                            minWidth: "100%",
-                            boxSizing: "border-box"
-                        }}
-                    >
-                        {code}
-                    </SyntaxHighlighter>
-                )}
+                {
+                    (["text"].includes(attr.lang) ? !hideCode[n] : hideCode[n]) && (
+                        <SyntaxHighlighter
+                            language={"rust"}
+                            style={materialDark}
+                            customStyle={{
+                                margin: 0,
+                                padding: "1rem",
+                                minWidth: "100%",
+                                boxSizing: "border-box"
+                            }}
+                        >
+                            {code}
+                        </SyntaxHighlighter>
+                    )
+                }
             </div >
         )
     }
@@ -566,10 +629,16 @@ export class ReactED extends ReactRender {
     ) {
         const attr = await this.visit(node.attributes);
 
+        const attr_str = Object.entries(attr)
+            .map(([key, value]) => `${key}=${typeof value === 'string' ? `"${value}"` : value}`)
+            .join(', ');
+
         const code = await this.visit(node.body, args);
 
         return (
             <div
+                data-lml="code"
+                data-attr={attr_str}
                 key={this.get_key("code")}
                 className="w-full max-w-[70vw] border rounded-md m-2 p-0 min-w-40"
             >
@@ -579,6 +648,7 @@ export class ReactED extends ReactRender {
                     </div>
                 </div>
                 <SyntaxHighlighter
+                    data-lml="code_block"
                     language={"rust"}
                     style={materialDark}
                     customStyle={{

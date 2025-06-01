@@ -19,7 +19,7 @@ export const ChatBox = ({
         if (newMessage.trim() === "") return;
 
         const result = sendMessage({
-            message: `pre { \`${newMessage}\` }`,
+            message: `p { \`${newMessage}\` }`, // change to pre once finetuned
             sender: "user",
         });
 
