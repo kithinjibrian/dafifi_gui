@@ -1,4 +1,4 @@
-import { useEffect, useRef, RefObject } from 'react';
+import { useEffect, useRef, RefObject, useState } from 'react';
 import { Button } from '../ui/button';
 import { Extras, PanelRef, set_panel } from '../utils/extras';
 import { X } from 'lucide-react';
@@ -6,7 +6,9 @@ import { useExtrasStore } from '@/store/extras';
 import { CodeBtns } from './extras/code';
 import { EditorBtns } from './extras/editor';
 
-const buttons: Record<string, any> = {
+type ExtrasComponent = React.FC<{ panelRef?: RefObject<PanelRef | null> }>;
+
+const buttons: Record<string, ExtrasComponent> = {
     Editor: EditorBtns,
     Code: CodeBtns,
     Server: () => <></>,
@@ -16,7 +18,8 @@ const buttons: Record<string, any> = {
 };
 
 export const ExtrasMD = ({ panelRef }: { panelRef: RefObject<PanelRef | null> }) => {
-    const { menu, setMenu, save, close } = useExtrasStore();
+    const [Component, setComponent] = useState<ExtrasComponent | null>(null);
+    const { menu } = useExtrasStore();
 
     const collapsePanel = () => {
         if (panelRef?.current) {
@@ -31,23 +34,16 @@ export const ExtrasMD = ({ panelRef }: { panelRef: RefObject<PanelRef | null> })
         }
     }, [panelRef]);
 
-    const handleSave = async () => {
-        if (save) await save();
-        collapsePanel();
-    };
-
-    const handleCancel = async () => {
-        if (close) await close();
-        collapsePanel();
-    };
-
-    const Component = buttons[menu];
+    useEffect(() => {
+        const Comp = buttons[menu];
+        setComponent(() => Comp ?? null);
+    }, [menu]);
 
     return (
         <div className="h-full w-full">
             <div className="flex gap-2 justify-end p-2 border-b">
                 {Component && <Component panelRef={panelRef} />}
-                <Button className="rounded-full" variant="ghost" onClick={handleCancel}>
+                <Button className="rounded-full" variant="ghost" onClick={collapsePanel}>
                     Close
                     <X />
                 </Button>

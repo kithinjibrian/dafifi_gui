@@ -9,7 +9,14 @@ import MonacoEditor from '@monaco-editor/react';
 import { Play, Save } from 'lucide-react';
 import { RefObject, useState } from 'react';
 
-export const EditorBtns = ({ panelRef }: { panelRef: RefObject<PanelRef | null> }) => {
+export const EditorBtns = (args: {
+    panelRef?: RefObject<PanelRef | null>,
+    isMobile?: boolean,
+    setOpen?: (open: boolean) => void
+}) => {
+    if (!args) return null;
+
+    const { panelRef, isMobile, setOpen } = args;
     const { push, exec } = useCodeStore();
     const { text } = useTextStore();
     const { editMessage, refreshChat } = useChatsStore();
@@ -20,8 +27,12 @@ export const EditorBtns = ({ panelRef }: { panelRef: RefObject<PanelRef | null> 
     if (!text) return null;
 
     const collapsePanel = () => {
-        if (panelRef?.current) {
-            panelRef.current.collapse();
+        if (isMobile) {
+            setOpen && setOpen(false);
+        } else {
+            if (panelRef?.current) {
+                panelRef.current.collapse();
+            }
         }
     };
 
@@ -67,8 +78,12 @@ export const EditorBtns = ({ panelRef }: { panelRef: RefObject<PanelRef | null> 
             const text = await handleSave(false);
 
             if (text) {
-                push([text.old_message]);
-                exec(text.chat_id, text.id!);
+                push({
+                    code: text.message,
+                    node: text.node
+                });
+
+                await exec(text.chat_id, text.id!);
             }
         } finally {
             setIsRunning(false);

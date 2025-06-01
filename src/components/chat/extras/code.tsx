@@ -21,15 +21,27 @@ function reducer(state, action) {
     }
 }
 
-export const CodeBtns = ({ panelRef }: { panelRef: RefObject<PanelRef | null> }) => {
+export const CodeBtns = (args: {
+    panelRef?: RefObject<PanelRef | null>,
+    isMobile?: boolean,
+    setOpen?: (open: boolean) => void
+}) => {
+    if (!args) return null;
+
+    const { panelRef, isMobile, setOpen } = args;
+
     const { text } = useTextStore();
     const { active, editMessage, refreshChat } = useChatsStore();
 
     if (!text) return <></>
 
     const collapsePanel = () => {
-        if (panelRef?.current) {
-            panelRef.current.collapse();
+        if (isMobile) {
+            setOpen && setOpen(false);
+        } else {
+            if (panelRef?.current) {
+                panelRef.current.collapse();
+            }
         }
     };
 

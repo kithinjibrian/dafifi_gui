@@ -56,7 +56,8 @@ export class ReactRender implements LmlASTVisitor {
         public save: boolean = false,
         public state: Record<string, any> = {
             mobile: [false, () => { }],
-            hideCode: [false, () => { }]
+            hideCode: [false, () => { }],
+            loading: [[[false],[false]], () => { }]
         }
     ) { }
 
@@ -86,7 +87,7 @@ export class ReactRender implements LmlASTVisitor {
             const react = await this.visit(this.ast);
             if (this.save) {
                 const exec = useCodeStore.getState().exec;
-                exec(this.chat_id, this.message.id!)
+                await exec(this.chat_id, this.message.id!);
             }
             return {
                 react
@@ -463,7 +464,10 @@ export class ReactRender implements LmlASTVisitor {
         if (this.save) {
             if (attr.lang === "lugha" && attr.run == "true") {
                 const push = useCodeStore.getState().push;
-                push(code);
+                push({
+                    code: code[0],
+                    node
+                });
             }
         }
 
@@ -496,7 +500,10 @@ export class ReactRender implements LmlASTVisitor {
 
                                     const { push, exec } = useCodeStore.getState();
 
-                                    push(code);
+                                    push({
+                                        code: code[0],
+                                        node
+                                    });
 
                                     await exec(self.chat_id, self.message.id!);
                                     setLoading(0, n);

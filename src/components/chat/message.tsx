@@ -44,7 +44,7 @@ export const Message = ({ message, isGrouped }: { message: MessageType; isGroupe
     const isMobile = useIsMobile();
     const [isHovered, setIsHovered] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [renderedComponents, setRenderedComponents] = useState([]);
+    const [renderedComponents, setRenderedComponents] = useState<any[]>([]);
     const [store, dispatch] = useReducer(reducer, { hideCode: [], loading: [[], []] });
     const { write } = useTextStore();
 
@@ -59,17 +59,28 @@ export const Message = ({ message, isGrouped }: { message: MessageType; isGroupe
 
     useEffect(() => {
         let a = async () => {
-            const { react } = await new ReactRender(
-                message,
-                active.id,
-                false,
-                {
-                    mobile: [isMobile, () => { }],
-                    hideCode: [store.hideCode, (index: number) => dispatch({ type: 'hideCode', index })],
-                    loading: [store.loading, (x: number, y: number) => dispatch({ type: 'Loading', x, y })]
-                }
-            ).run();
-            setRenderedComponents(react);
+            try {
+                const { react } = await new ReactRender(
+                    message,
+                    active.id,
+                    false,
+                    {
+                        mobile: [isMobile, () => { }],
+                        hideCode: [store.hideCode, (index: number) => dispatch({ type: 'hideCode', index })],
+                        loading: [store.loading, (x: number, y: number) => dispatch({ type: 'Loading', x, y })]
+                    }
+                ).run();
+                setRenderedComponents(react);
+            } catch (e: any) {
+                setRenderedComponents([
+                    <div
+                        key={"error-1"}
+                        className="text-red-500">
+                        <h2 key={"error-2"} className="text-2xl">Failed to render response</h2>
+                        <p key={"error-3"}>Error: {e.message}</p>
+                    </div>
+                ]);
+            }
         };
         a();
     }, [message, isMobile, store]);
