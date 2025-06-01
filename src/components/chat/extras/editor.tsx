@@ -4,7 +4,7 @@ import { useChatsStore } from '@/store/chats';
 import { useCodeStore } from '@/store/code';
 import { useTextStore } from '@/store/text';
 import { ASTToLML } from '@/utils/ast2lml';
-import { ASTNode, BlockNode, StringNode } from '@kithinji/lml';
+import { ASTNode, StringNode } from '@kithinji/lml';
 import MonacoEditor from '@monaco-editor/react';
 import { Play, Save } from 'lucide-react';
 import { RefObject, useState } from 'react';
