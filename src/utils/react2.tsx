@@ -39,6 +39,8 @@ import { useCodeStore } from "@/store/code";
 import { Message } from "@/store/message";
 import { useTextStore } from "@/store/text";
 import { open_extras } from "@/components/utils/extras";
+import { ASTToLML } from "./ast2lml";
+import { useChatsStore } from "@/store/chats";
 
 export class ReactRender implements LmlASTVisitor {
     private extensions: Extension<any>[] = [];
@@ -57,7 +59,7 @@ export class ReactRender implements LmlASTVisitor {
         public state: Record<string, any> = {
             mobile: [false, () => { }],
             hideCode: [false, () => { }],
-            loading: [[[false],[false]], () => { }]
+            loading: [[[false], [false]], () => { }]
         }
     ) { }
 
@@ -87,7 +89,19 @@ export class ReactRender implements LmlASTVisitor {
             const react = await this.visit(this.ast);
             if (this.save) {
                 const exec = useCodeStore.getState().exec;
-                await exec(this.chat_id, this.message.id!);
+                const altered = await exec(this.chat_id, this.message.id!);
+
+                if (altered && this.ast) {
+                    const { editMessage, refreshChat } = useChatsStore.getState();
+                    const lml = new ASTToLML(this.ast).run();
+
+                    await editMessage({
+                        id: this.message.id,
+                        message: lml
+                    });
+
+                    await refreshChat();
+                }
             }
             return {
                 react

@@ -264,7 +264,7 @@ export const MessageList = ({ messages, messagesEndRef }) => {
     const groupedMessages = groupMessages(messages);
 
     return (
-        <ScrollArea className="flex-1 h-[90%] md:h-[80%] w-full p-4">
+        <div className="flex-1 h-[100%] w-full p-4">
             {groupedMessages.map((group, index) => (
                 <MessageGroup
                     key={index}
@@ -273,7 +273,7 @@ export const MessageList = ({ messages, messagesEndRef }) => {
             ))}
             <div className="py-10"></div>
             <div ref={messagesEndRef} />
-        </ScrollArea>
+        </div>
 
     );
 };

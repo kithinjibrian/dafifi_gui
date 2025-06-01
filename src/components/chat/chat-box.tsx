@@ -1,5 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { Switch } from "../ui/switch";
+import { Label } from "../ui/label";
 
 type ChatBoxProps = {
     sendMessage: (data: { message: string; sender: string }) => void;
@@ -14,6 +16,10 @@ export const ChatBox = ({
 }: ChatBoxProps) => {
     const [newMessage, setNewMessage] = useState(initMessage);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+    useEffect(() => {
+        textareaRef.current?.focus();
+    }, []);
 
     const handleSend = () => {
         if (newMessage.trim() === "") return;
@@ -55,7 +61,7 @@ export const ChatBox = ({
 
     return (
         <div className="bg-card w-full rounded-4xl p-2 flex flex-col gap-2">
-            <div className="flex flex-row items-end w-full gap-2">
+            <div className="flex flex-row items-end w-full gap-2" style={{ alignItems: 'flex-end' }}>
                 <div className="flex-1 relative">
                     <textarea
                         ref={textareaRef}
@@ -89,6 +95,17 @@ export const ChatBox = ({
                         <X />
                     </button>
                 )}
+            </div>
+
+            <div className="p-2 flex flex-row gap-2">
+                <div className="flex items-center space-x-2">
+                    <Label htmlFor="live-mode">Live</Label>
+                    <Switch id="live-mode" />
+                </div>
+                <div className="flex items-center space-x-2">
+                    <Label htmlFor="yolo-mode">YOLO</Label>
+                    <Switch id="yolo-mode" />
+                </div>
             </div>
         </div>
     );

@@ -49,26 +49,28 @@ export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }
     }, [params.slug, active, fetchChat, router]);
 
     return (
-        <div className="relative flex flex-col h-[95%] md:h-full w-full pt-10 md:pt-2">
-            <div className="flex justify-end">
-                <Button
-                    variant="ghost"
-                    onClick={() => {
-                        open_extras(isMobile, {
-                            menu: "Editor",
-                            save: () => { },
-                        })
-                    }}>
-                    <Menu />
-                </Button>
+        <div className="relative flex flex-col h-[95%] md:h-full w-full pt-10 md:pt-2 min-h-screen">
+            <div className="flex-1 overflow-y-auto">
+                <div className="flex justify-end">
+                    <Button
+                        variant="ghost"
+                        onClick={() => {
+                            open_extras(isMobile, {
+                                menu: "Editor",
+                                save: () => { },
+                            })
+                        }}>
+                        <Menu />
+                    </Button>
+                </div>
+                {active && (
+                    <MessageList
+                        messages={active.messages}
+                        messagesEndRef={messagesEndRef}
+                    />
+                )}
             </div>
-            {active && (
-                <MessageList
-                    messages={active.messages}
-                    messagesEndRef={messagesEndRef}
-                />
-            )}
-            <div className="fixed bottom-0 md:relative w-full flex flex-col p-1 shadow-lg items-center bg-background">
+            <div className="bg-background">
                 <ChatBox sendMessage={sendMessageWrap} />
                 <div className="flex m-2">
                 </div>
