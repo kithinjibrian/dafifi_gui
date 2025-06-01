@@ -1,10 +1,8 @@
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { ReactRender } from "@/utils/react2";
-import { ScrollArea } from "../ui/scroll-area";
 import { useEffect, useReducer, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { time } from "@/utils/time";
-import Link from "next/link";
 import { Copy, Pencil, ThumbsDown, ThumbsUp } from "lucide-react";
 import { Button } from "../ui/button";
 import { ChatBox } from "./chat-box";

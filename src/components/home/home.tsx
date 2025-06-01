@@ -9,7 +9,9 @@ export const Home = () => {
     const router = useRouter();
     const {
         sendMessage,
+        appendMessage,
         fetchChat,
+        setStreaming
     } = useChatsStore();
 
     const handleHeader = async (data: any) => {
@@ -24,15 +26,23 @@ export const Home = () => {
     const handleSendMessage = useCallback(
         async (msg: Message) => {
             try {
+                setStreaming(true);
+
                 await sendMessage(
                     { ...msg, chat_id: "new" },
                     handleHeader,
+                    (message_id: string, message: string) => {
+                        appendMessage(message_id, message);
+                    },
                     () => { }
                 );
+
                 return "success";
             } catch (err) {
                 console.error("Error sending message:", err);
                 return "error";
+            } finally {
+                setStreaming(false);
             }
         },
         [sendMessage]
@@ -44,7 +54,9 @@ export const Home = () => {
                 <h1 className="text-3xl font-bold">What can I do for you?</h1>
             </div>
             <div className="mt-4 w-3/4">
-                <ChatBox sendMessage={handleSendMessage} />
+                <ChatBox
+                    sendMessage={handleSendMessage}
+                />
             </div>
         </div>
     );

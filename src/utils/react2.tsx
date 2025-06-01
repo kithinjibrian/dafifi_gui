@@ -84,6 +84,8 @@ export class ReactRender implements LmlASTVisitor {
 
     public async run() {
         try {
+            if (!this.message || (this.message && this.message.message == undefined)) return;
+
             this.ast = await lml(this.message.message);
 
             const react = await this.visit(this.ast);

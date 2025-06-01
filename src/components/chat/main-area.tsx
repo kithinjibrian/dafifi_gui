@@ -7,6 +7,8 @@ import { Menu } from "lucide-react";
 import { open_extras } from "../utils/extras";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "../ui/button";
+import { useCStackStore } from "@/store/cstack";
+import { Message } from "@/store/message";
 
 
 export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }) => {
@@ -17,8 +19,12 @@ export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }
     const {
         active,
         fetchChat,
-        sendMessageWrap
+        sendMessageWrap,
+        sendMessage,
+        setStreaming
     } = useChatsStore();
+
+    const { append, new_message } = useCStackStore();
 
     const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -49,7 +55,7 @@ export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }
     }, [params.slug, active, fetchChat, router]);
 
     return (
-        <div className="relative flex flex-col h-[95%] md:h-full w-full pt-10 md:pt-2 min-h-screen">
+        <div className="flex flex-col md:h-full pt-10 md:pt-2">
             <div className="flex-1 overflow-y-auto">
                 <div className="flex justify-end">
                     <Button
@@ -70,8 +76,28 @@ export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }
                     />
                 )}
             </div>
-            <div className="bg-background">
-                <ChatBox sendMessage={sendMessageWrap} />
+            <div className="flex flex-col bg-background px-2 w-full items-center">
+                <ChatBox
+                    sendMessage={sendMessageWrap}
+                    onTyping={async (msg: any) => {
+                        if (msg.message == "") return;
+
+                        setStreaming(true);
+
+                        new_message();
+
+                        await sendMessage(
+                            { ...msg, transient: true, chat_id: active?.id },
+                            () => { },
+                            (message_id: string, message: string) => {
+                                append(message);
+                            },
+                            () => { }
+                        );
+
+                        setStreaming(false);
+                    }}
+                />
                 <div className="flex m-2">
                 </div>
             </div>

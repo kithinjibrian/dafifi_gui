@@ -44,8 +44,7 @@ export const useCodeStore = create<CodeStore>((set, get) => ({
                     }
                 }
 
-                const pushMessage = useChatsStore.getState().pushMessage;
-                const sendMessage = useChatsStore.getState().sendMessage;
+                const { pushMessage, appendMessage, sendMessage } = useChatsStore.getState();
 
                 pushMessage(response.data.data);
 
@@ -62,6 +61,9 @@ export const useCodeStore = create<CodeStore>((set, get) => ({
                             message: "",
                             createdAt: header.icreated_at
                         });
+                    },
+                    (message_id: string, message: string) => {
+                        appendMessage(message_id, message);
                     },
                     () => { }
                 );

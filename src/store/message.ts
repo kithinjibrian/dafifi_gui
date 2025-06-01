@@ -4,5 +4,6 @@ export interface Message {
     message: string;
     chat_id?: string;
     createdAt?: string;
+    transient?: boolean;
     edit?: boolean
 }
