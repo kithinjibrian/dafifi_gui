@@ -1,0 +1,5 @@
+handle transient messages well
+
+the send button should take what is on top of chat stack and use that in the 
+
+chat history

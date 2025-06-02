@@ -2,13 +2,19 @@
 
 import { Button } from '@/components/ui/button';
 import { useCStackStore } from '@/store/cstack';
-import { ChevronLeft, ChevronRight, Scroll } from 'lucide-react';
+import {  ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '../ui/card';
 import { ScrollArea } from '../ui/scroll-area';
 import { ReactED } from '@/utils/react2';
 
-const Message = ({ message }: { message: string }) => {
+const Message = ({
+    message,
+    ref
+}: {
+    message: string,
+    ref: any
+}) => {
     const [renderedComponents, setRenderedComponents] = useState<any[]>([]);
 
     useEffect(() => {
@@ -34,47 +40,67 @@ const Message = ({ message }: { message: string }) => {
     }, [message]);
 
     return (
-        <>
+        <div
+            ref={ref}
+            contentEditable
+            suppressContentEditableWarning={true}
+            className="outline-none min-h-full"
+            role="textbox"
+            aria-label="Code editor output"
+        >
             {renderedComponents}
-        </>
+        </div>
     );
 }
 
-export default function CStackViewer() {
+export default function CStackViewer(
+    {
+        ref,
+        current,
+        setCurrent
+    }: {
+        ref: any,
+        current: number,
+        setCurrent: (_: any) => void
+    }
+) {
     const { stack, index } = useCStackStore();
-    const [current, setCurrent] = useState(0);
 
     useEffect(() => {
         setCurrent(index - 1);
     }, [index]);
 
     const goLeft = () => {
-        setCurrent(prev => Math.max(prev - 1, 0));
+        setCurrent((prev: number) => Math.max(prev - 1, 0));
     };
 
     const goRight = () => {
-        setCurrent(prev => Math.min(prev + 1, stack.length - 1));
+        setCurrent((prev: number) => Math.min(prev + 1, stack.length - 1));
     };
 
     if (stack.length === 0) return null;
 
     return (
-        <Card className="bg-card rounded-4xl p-4 flex flex-col items-center gap-4">
+        <Card className="w-full p-4 flex flex-col items-center gap-4">
             <CardContent className="w-full">
                 <ScrollArea className="h-80">
-                    <Message message={stack[current]} />
+                    <Message ref={ref} message={stack[current]} />
                 </ScrollArea>
             </CardContent>
-            <div className="flex items-center justify-between w-full">
-                <Button variant="ghost" onClick={goLeft} disabled={current === 0}>
-                    <ChevronLeft />
-                </Button>
-                <span className="text-sm text-muted-foreground">
-                    {current + 1} of {stack.length}
-                </span>
-                <Button variant="ghost" onClick={goRight} disabled={current === stack.length - 1}>
-                    <ChevronRight />
-                </Button>
+            <div className='flex flex-row w-full justify-between'>
+                <div>
+                </div>
+                <div className="flex items-center">
+                    <Button variant="ghost" onClick={goLeft} disabled={current === 0}>
+                        <ChevronLeft />
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                        {current + 1} of {stack.length}
+                    </span>
+                    <Button variant="ghost" onClick={goRight} disabled={current === stack.length - 1}>
+                        <ChevronRight />
+                    </Button>
+                </div>
             </div>
         </Card>
     );

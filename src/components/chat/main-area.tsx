@@ -8,7 +8,7 @@ import { open_extras } from "../utils/extras";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "../ui/button";
 import { useCStackStore } from "@/store/cstack";
-import { Message } from "@/store/message";
+import { Message, useMessageStore } from "@/store/message";
 
 
 export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }) => {
@@ -23,6 +23,8 @@ export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }
         sendMessage,
         setStreaming
     } = useChatsStore();
+
+    const { saveMessage } = useMessageStore();
 
     const { append, new_message } = useCStackStore();
 
@@ -97,6 +99,7 @@ export const MainArea = ({ panelRef }: { panelRef: React.RefObject<any> | null }
 
                         setStreaming(false);
                     }}
+                    saveMessage={saveMessage}
                 />
                 <div className="flex m-2">
                 </div>

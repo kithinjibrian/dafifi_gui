@@ -169,6 +169,19 @@ class UnorderedListVisitor extends NodeVisitor {
     }
 }
 
+class OrderedListVisitor extends NodeVisitor {
+    visit(node: Node, context: ConversionContext): string {
+        let lml = (node as Element).getAttribute('data-lml');
+        const content = this.visitChildren(node, context);
+
+        if (lml == "ol") {
+            return `ol {\n${content}\n}`;
+        }
+
+        return content;
+    }
+}
+
 class ListVisitor extends NodeVisitor {
     visit(node: Node, context: ConversionContext): string {
         let lml = (node as Element).getAttribute('data-lml');
@@ -287,6 +300,7 @@ class VisitorRegistry {
 
         // Lists
         this.visitors.set('ul', new UnorderedListVisitor());
+        this.visitors.set('ol', new OrderedListVisitor());
         this.visitors.set('li', new ListVisitor());
 
         // Links and media

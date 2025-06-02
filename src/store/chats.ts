@@ -21,6 +21,7 @@ export interface ChatStore {
     active: Chat | null;
     streaming: boolean;
     setStreaming: (streaming: boolean) => void;
+    createChat: (message: Message) => Promise<Chat>;
     setChats: (id: string, data: any) => void;
     setActive: (id: string) => void;
     fetchChats: () => void;
@@ -67,6 +68,18 @@ const createChatSlice: StateCreator<ChatStore> = (set, get) => {
                 set({ streaming: false });
                 controllerRef.abort();
                 controllerRef = null;
+            }
+        },
+        createChat: async (nessage: Message) => {
+            try {
+                const response = await request.post("chat", nessage);
+                await get().fetchChats()
+                await get().fetchChat(response.data.id, () => { })
+
+                return response.data
+            } catch (e) {
+                report_error(e)
+                throw e;
             }
         },
         setChats: (id: string, data: Partial<Chat>) => {

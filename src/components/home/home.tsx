@@ -1,9 +1,10 @@
-import { useCallback } from "react";
+import { use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 import { ChatBox } from "../chat/chat-box";
 import { useChatsStore } from "@/store/chats";
-import { Message } from "@/store/message";
+import { Message, useMessageStore } from "@/store/message";
+import { useCStackStore } from "@/store/cstack";
 
 export const Home = () => {
     const router = useRouter();
@@ -11,8 +12,13 @@ export const Home = () => {
         sendMessage,
         appendMessage,
         fetchChat,
-        setStreaming
+        setStreaming,
+        createChat
     } = useChatsStore();
+
+    const { saveMessage } = useMessageStore();
+
+    const { append, new_message } = useCStackStore();
 
     const handleHeader = async (data: any) => {
         try {
@@ -48,6 +54,20 @@ export const Home = () => {
         [sendMessage]
     );
 
+    const handleSaveMessage = useCallback(
+        async (msg: Message) => {
+            if (msg.sender == "user") {
+                // first message
+                let chat = await createChat(msg);
+                router.push(`/c/${chat.id}`);
+            } else if (msg.sender == "assistant") {
+                // subsequent assistant message
+                await saveMessage(msg);
+            }
+        },
+        [saveMessage]
+    )
+
     return (
         <div className="flex flex-col items-center justify-center h-screen w-full">
             <div className="text-center">
@@ -56,6 +76,25 @@ export const Home = () => {
             <div className="mt-4 w-3/4">
                 <ChatBox
                     sendMessage={handleSendMessage}
+                    onTyping={async (msg: any) => {
+                        if (msg.message == "") return;
+
+                        setStreaming(true);
+
+                        new_message();
+
+                        await sendMessage(
+                            { ...msg, transient: true },
+                            () => { },
+                            (message_id: string, message: string) => {
+                                append(message);
+                            },
+                            () => { }
+                        );
+
+                        setStreaming(false);
+                    }}
+                    saveMessage={handleSaveMessage}
                 />
             </div>
         </div>

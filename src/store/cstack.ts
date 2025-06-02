@@ -6,6 +6,7 @@ export interface CStackStore {
     new_message: () => number;
     append: (code: string) => void;
     peek: () => string;
+    remove: (i: number) => void;
 }
 
 export const useCStackStore = create<CStackStore>((set, get) => ({
@@ -20,10 +21,9 @@ export const useCStackStore = create<CStackStore>((set, get) => ({
         return currentIndex;
     },
     append: (code: string) => {
-        const { stack, index } = get();
-        set(() => {
-            const updatedStack = [...stack];
-            const targetIndex = index - 1;
+        set(state => {
+            const updatedStack = [...state.stack];
+            const targetIndex = state.index - 1;
             if (targetIndex >= 0 && targetIndex < updatedStack.length) {
                 updatedStack[targetIndex] += code;
             }
@@ -33,5 +33,16 @@ export const useCStackStore = create<CStackStore>((set, get) => ({
     peek: () => {
         const stack = get().stack;
         return stack[stack.length - 1] || "";
+    },
+    remove: (i: number) => {
+        set(state => {
+            if (i < 0 || i >= state.stack.length) return {};
+            const newStack = state.stack.filter((_, idx) => idx !== i);
+            const newIndex = state.index > i ? state.index - 1 : state.index;
+            return {
+                stack: newStack,
+                index: newIndex
+            };
+        });
     }
 }));

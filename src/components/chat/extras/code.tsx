@@ -83,8 +83,16 @@ export const CodeEd = () => {
         includeImages: true,
         includeLinks: true,
         includeTables: true,
-        codeLanguage: 'javascript'
+        codeLanguage: 'lugha'
     });
+
+    const converterRef = useRef(new HTMLToLML({
+        preserveWhitespace: false,
+        includeImages: true,
+        includeLinks: true,
+        includeTables: true,
+        codeLanguage: 'lugha'
+    }));
 
     if (!text) return <div className="p-4 text-gray-500">No code to render</div>;
 
@@ -141,19 +149,11 @@ export const CodeEd = () => {
         );
     }
 
-    const getHTML = (): string => {
-        if (contentRef.current) {
-            return contentRef.current.innerHTML;
-        }
-        return '';
-    };
+    const getHTML = (): string => contentRef.current?.innerHTML || '';
 
     const getLML = (): string => {
         const html = getHTML();
-        if (html) {
-            return converter.convert(html);
-        }
-        return '';
+        return html ? converterRef.current.convert(html) : '';
     };
 
     return (
