@@ -13,7 +13,6 @@ import { HTMLToLML } from "@/utils/html2lml";
 import {
     DndContext,
     useDraggable,
-    useDroppable,
     DragEndEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
@@ -223,6 +222,9 @@ export const ChatBox = ({
 
     const handleSaveInChat = async () => {
         if (newMessage.trim() === "") return;
+
+        setNewMessage("");
+        
         const prompt = `p { \`${newMessage}\` }`;
         await saveMessage({ message: prompt, sender: "user" });
         const message = getLML();
