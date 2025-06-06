@@ -1,3 +1,5 @@
+"use client"
+
 import { useChatsStore } from "@/store/chats";
 import { MessageList } from "./message";
 import { useCallback, useEffect, useRef } from "react";

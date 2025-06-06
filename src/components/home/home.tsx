@@ -1,3 +1,5 @@
+"use client";
+
 import { use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
@@ -95,6 +97,7 @@ export const Home = () => {
                         setStreaming(false);
                     }}
                     saveMessage={handleSaveMessage}
+                    preview_position={{ x: 100, y: -250 }}
                 />
             </div>
         </div>

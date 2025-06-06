@@ -3,6 +3,7 @@ import { create, StateCreator } from "zustand";
 import { Message } from "./message";
 import { createTabSlice, TabStore } from "./tab"
 import { createTaskSlice, TaskStore } from "./task"
+import { createSandboxSlice, SandboxStore } from "./sandbox"
 import { ReactRender } from "@/utils/react2";
 import { ArrayStore, createArraySlice } from "./array";
 
@@ -13,6 +14,7 @@ export interface Chat {
     starred: boolean;
     selected: boolean;
     tasks: any[];
+    sandbox: any;
 }
 
 
@@ -382,10 +384,11 @@ const createChatSlice: StateCreator<ChatStore> = (set, get) => {
 }
 
 export const useChatsStore = create<
-    ChatStore & TabStore & TaskStore & ArrayStore
+    ChatStore & TabStore & TaskStore & ArrayStore & SandboxStore
 >((...a) => ({
     ...createChatSlice(...a),
     ...createTabSlice(...a),
     ...createTaskSlice(...a),
+    ...createSandboxSlice(...a),
     ...createArraySlice(...a)
 }))

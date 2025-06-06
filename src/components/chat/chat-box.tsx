@@ -114,6 +114,7 @@ type ChatBoxProps = {
     onTyping?: (data: { message: string; sender: string }) => Promise<void>;
     debounceDelay?: number;
     saveMessage?: (data: { message: string; sender: string }) => void;
+    preview_position?: { x: number; y: number };
 };
 
 const estimateRows = (message: string, charsPerLine: number = 50): number => {
@@ -146,7 +147,8 @@ export const ChatBox = ({
     initMessage = "",
     onTyping = async () => { },
     debounceDelay = 1000,
-    saveMessage = async () => { }
+    saveMessage = async () => { },
+    preview_position = { x: 100, y: -500 }
 }: ChatBoxProps) => {
     const [newMessage, setNewMessage] = useState(initMessage);
     const [isTyping, setIsTyping] = useState(false);
@@ -224,7 +226,7 @@ export const ChatBox = ({
         if (newMessage.trim() === "") return;
 
         setNewMessage("");
-        
+
         const prompt = `p { \`${newMessage}\` }`;
         await saveMessage({ message: prompt, sender: "user" });
         const message = getLML();
@@ -232,7 +234,7 @@ export const ChatBox = ({
         remove(current);
     };
 
-    const [panelPosition, setPanelPosition] = useState({ x: 100, y: -250 });
+    const [panelPosition, setPanelPosition] = useState(preview_position);
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { delta } = event;

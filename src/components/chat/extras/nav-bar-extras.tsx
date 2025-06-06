@@ -1,4 +1,4 @@
-import { Braces, Brackets, Clock4, Code, Server as ServerIcon, SquarePen } from "lucide-react"
+import { Braces, Brackets, Clock4, Code, Computer, Server as ServerIcon, SquarePen } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs"
 import { TooltipComponent } from "../../utils/tooltip";
 import { Server } from "./server";
@@ -7,10 +7,12 @@ import { ArrayUI } from "./array";
 import { useExtrasStore } from "@/store/extras";
 import { Editor } from "./editor";
 import { CodeEd } from "./code";
+import { Desktop } from "./desktop";
 
 const navItems = [
     { value: 'Editor', icon: SquarePen, content: Editor },
     { value: 'Code', icon: Code, content: CodeEd },
+    { value: 'Desktop', icon: Computer, content: Desktop },
     { value: 'Server', icon: ServerIcon, content: Server },
     { value: 'Cronjobs', icon: Clock4, content: Cron },
     { value: 'Array', icon: Brackets, content: ArrayUI },

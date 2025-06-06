@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useCStackStore } from '@/store/cstack';
-import {  ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from '../ui/card';
 import { ScrollArea } from '../ui/scroll-area';
@@ -81,8 +81,8 @@ export default function CStackViewer(
     if (stack.length === 0) return null;
 
     return (
-        <Card className="w-full p-4 flex flex-col items-center gap-4">
-            <CardContent className="w-full">
+        <Card className="w-full p-0 flex flex-col items-center gap-4">
+            <CardContent className="w-full px-2">
                 <ScrollArea className="h-80">
                     <Message ref={ref} message={stack[current]} />
                 </ScrollArea>

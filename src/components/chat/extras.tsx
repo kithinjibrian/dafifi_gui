@@ -11,6 +11,7 @@ type ExtrasComponent = React.FC<{ panelRef?: RefObject<PanelRef | null> }>;
 const buttons: Record<string, ExtrasComponent> = {
     Editor: EditorBtns,
     Code: CodeBtns,
+    Computer: () => <></>,
     Server: () => <></>,
     Cronjobs: () => <></>,
     Array: () => <></>,
